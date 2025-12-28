@@ -444,6 +444,34 @@
             border-color: #3498db;
         }
         
+        /* Modal de instrucciones */
+        .instructions-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 4000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .instructions-modal.active {
+            display: flex;
+        }
+        
+        .instructions-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
         /* Footer */
         footer {
             background-color: #2c3e50;
@@ -779,7 +807,7 @@
                         <li><i class="fas fa-map-marker-alt"></i> Calle Moda 123, Ciudad</li>
                         <li><i class="fas fa-phone"></i> +1 234 567 890</li>
                         <li><i class="fas fa-envelope"></i> info@modaelegante.com</li>
-                        <li><i class="fab fa-whatsapp"></i> +1 234 567 891</li>
+                        <li><i class="fab fa-whatsapp"></i> +54 9 11 1234-5678</li>
                     </ul>
                 </div>
             </div>
@@ -870,11 +898,53 @@
         </div>
     </div>
 
+    <!-- Modal de Instrucciones WhatsApp -->
+    <div class="instructions-modal" id="instructionsModal">
+        <div class="instructions-content">
+            <h2 style="color: #25D366; margin-bottom: 20px;">
+                <i class="fab fa-whatsapp"></i> Instrucciones para Completar tu Pedido
+            </h2>
+            
+            <div style="margin-bottom: 20px;">
+                <p><strong>Tu pedido ha sido generado exitosamente.</strong></p>
+                <p>Para completar la compra, sigue estos pasos:</p>
+                
+                <ol style="margin: 15px 0; padding-left: 20px;">
+                    <li style="margin-bottom: 10px;">Abre WhatsApp en tu teléfono</li>
+                    <li style="margin-bottom: 10px;">Envía un mensaje al número: <strong id="whatsappNumberDisplay">+5491112345678</strong></li>
+                    <li style="margin-bottom: 10px;">Copia y pega el siguiente texto:</li>
+                </ol>
+                
+                <div id="orderTextDisplay" style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0; font-family: monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; border: 1px solid #ddd;">
+                    <!-- El texto del pedido se insertará aquí -->
+                </div>
+                
+                <p style="margin-top: 15px;">O escanea este código QR para abrir el chat directamente:</p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <div id="qrCodeContainer" style="display: inline-block; padding: 10px; background: white; border: 1px solid #ddd; border-radius: 5px;">
+                        <!-- El código QR se generará aquí -->
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button id="copyOrderText" style="flex: 1; background: #3498db; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    <i class="fas fa-copy"></i> Copiar Texto
+                </button>
+                <button id="closeInstructions" style="flex: 1; background: #27ae60; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    <i class="fas fa-check"></i> Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Sistema de Carrito Mejorado
         class ShoppingCart {
             constructor() {
                 this.cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
+                this.whatsappNumber = "5491112345678"; // <-- ¡IMPORTANTE! CAMBIA ESTE NÚMERO
                 this.init();
             }
             
@@ -941,6 +1011,18 @@
                     if (e.target.id === 'checkoutModal') {
                         this.closeCheckout();
                     }
+                    if (e.target.id === 'instructionsModal') {
+                        this.closeInstructions();
+                    }
+                });
+                
+                // Botones del modal de instrucciones
+                document.getElementById('copyOrderText')?.addEventListener('click', () => {
+                    this.copyOrderText();
+                });
+                
+                document.getElementById('closeInstructions')?.addEventListener('click', () => {
+                    this.closeInstructions();
                 });
             }
             
@@ -1164,6 +1246,15 @@
                 document.getElementById('checkoutModal').classList.remove('active');
             }
             
+            openInstructions() {
+                document.getElementById('instructionsModal').classList.add('active');
+            }
+            
+            closeInstructions() {
+                document.getElementById('instructionsModal').classList.remove('active');
+                this.clearCart();
+            }
+            
             completeOrder() {
                 // Obtener datos del formulario
                 const email = document.getElementById('customerEmail').value;
@@ -1224,36 +1315,70 @@
                 
                 orderSummary += `%0A%0A_Pedido ID: ${Date.now()}_`;
                 
-                // Número de WhatsApp - ¡CÁMBIALO POR TU NÚMERO REAL!
-                // Formato: código de país + número (sin +, espacios o guiones)
-                // Ejemplo para Argentina: 5491112345678
-                // Ejemplo para México: 5215512345678
-                // Ejemplo para España: 34612345678
-                const whatsappNumber = "916352741"; // <-- ¡CAMBIAR POR TU NÚMERO!
+                // Formatear el número para mostrar
+                const formattedNumber = this.formatPhoneNumber(this.whatsappNumber);
                 
-                // Crear enlace de WhatsApp
-                const whatsappLink = `https://wa.me/${whatsappNumber}?text=${orderSummary}`;
+                // Mostrar instrucciones en lugar de intentar abrir WhatsApp directamente
+                this.showOrderInstructions(orderSummary, formattedNumber);
                 
-                // Mostrar confirmación
-                const confirmMessage = `¡Pedido creado exitosamente!%0A%0A`;
-                const finalWhatsappLink = `https://wa.me/${whatsappNumber}?text=${confirmMessage}${orderSummary}`;
-                
-                // Abrir WhatsApp
-                window.open(finalWhatsappLink, '_blank');
-                
-                // Guardar pedido en localStorage (historial)
-                this.saveOrderHistory(email, name, total);
-                
-                // Limpiar carrito
-                this.clearCart();
-                
-                // Cerrar modal
+                // Cerrar modal de checkout
                 this.closeCheckout();
+            }
+            
+            formatPhoneNumber(number) {
+                // Formatear número para mostrar (agregar + y espacios)
+                if (number.startsWith('549')) {
+                    return `+54 9 ${number.substring(3, 5)} ${number.substring(5, 9)}-${number.substring(9)}`;
+                }
+                return `+${number}`;
+            }
+            
+            showOrderInstructions(orderSummary, formattedNumber) {
+                // Decodificar el texto para mostrarlo
+                const decodedText = decodeURIComponent(orderSummary).replace(/%0A/g, '\n');
                 
-                // Mostrar mensaje de agradecimiento
-                setTimeout(() => {
-                    alert('¡Gracias por tu pedido! Se ha abierto WhatsApp con el resumen de tu compra. Por favor, envía el mensaje para procesar tu orden.');
-                }, 500);
+                // Mostrar número en el modal
+                document.getElementById('whatsappNumberDisplay').textContent = formattedNumber;
+                
+                // Mostrar texto del pedido
+                document.getElementById('orderTextDisplay').textContent = decodedText;
+                
+                // Generar código QR
+                this.generateQRCode(orderSummary);
+                
+                // Abrir modal de instrucciones
+                this.openInstructions();
+            }
+            
+            generateQRCode(orderSummary) {
+                const qrContainer = document.getElementById('qrCodeContainer');
+                const whatsappUrl = `https://api.whatsapp.com/send?phone=${this.whatsappNumber}&text=${orderSummary}`;
+                
+                // Usar API de Google Charts para generar QR
+                const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(whatsappUrl)}&choe=UTF-8`;
+                
+                qrContainer.innerHTML = `<img src="${qrUrl}" alt="Código QR para WhatsApp" style="width: 200px; height: 200px;">`;
+            }
+            
+            copyOrderText() {
+                const orderText = document.getElementById('orderTextDisplay').textContent;
+                
+                navigator.clipboard.writeText(orderText).then(() => {
+                    // Mostrar mensaje de confirmación
+                    const copyBtn = document.getElementById('copyOrderText');
+                    const originalText = copyBtn.innerHTML;
+                    
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                    copyBtn.style.background = '#27ae60';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.style.background = '#3498db';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Error al copiar texto: ', err);
+                    alert('No se pudo copiar el texto. Por favor, selecciona y copia manualmente.');
+                });
             }
             
             saveOrderHistory(email, name, total) {
@@ -1300,13 +1425,13 @@
                     }
                 });
             });
-        });
-        
-        // Prevenir que el formulario se envíe con Enter fuera de los inputs
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
+            
+            // Prevenir que el formulario se envíe con Enter fuera de los inputs
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                }
+            });
         });
     </script>
 </body>
