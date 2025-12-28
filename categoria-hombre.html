@@ -6,7 +6,7 @@
     <title>Ropa de Hombre - Moda Elegante</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Copia los mismos estilos del index.html hasta .products-grid */
+        /* Mismos estilos que index.html */
         * {
             margin: 0;
             padding: 0;
@@ -74,6 +74,26 @@
             color: #e74c3c;
         }
         
+        .cart-icon {
+            position: relative;
+            font-size: 20px;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .menu-toggle {
             display: none;
             font-size: 24px;
@@ -118,6 +138,7 @@
             height: 250px;
             background-size: cover;
             background-position: center;
+            background-color: #f8f9fa;
         }
         
         .product-content {
@@ -160,7 +181,7 @@
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
-            margin-top: 30px;
+            margin: 30px 0;
         }
         
         @media (max-width: 768px) {
@@ -208,6 +229,12 @@
                     <li><a href="categoria-accesorios.html">Accesorios</a></li>
                     <li><a href="categoria-ninos.html">Niños</a></li>
                     <li><a href="categoria-calzado.html">Calzado</a></li>
+                    <li>
+                        <a href="#" class="cart-icon" id="openCart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -225,7 +252,7 @@
             <!-- Los productos se cargarán dinámicamente -->
         </div>
         
-        <div style="text-align: center; margin: 40px 0;">
+        <div style="text-align: center;">
             <a href="index.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Volver al Inicio
             </a>
@@ -233,15 +260,34 @@
     </div>
 
     <script>
+        // Cargar carrito y productos
+        let shoppingCart;
+        
         document.addEventListener('DOMContentLoaded', () => {
-            // Cargar productos desde localStorage
+            // Inicializar carrito
+            shoppingCart = new ShoppingCart();
+            
+            // Determinar categoría actual por la URL
+            const currentPage = window.location.pathname.split('/').pop();
+            const categoryMap = {
+                'categoria-hombre.html': 'hombre',
+                'categoria-mujer.html': 'mujer',
+                'categoria-accesorios.html': 'accesorios',
+                'categoria-ninos.html': 'ninos',
+                'categoria-calzado.html': 'calzado',
+                'categoria-ofertas.html': 'ofertas'
+            };
+            
+            const currentCategory = categoryMap[currentPage] || 'hombre';
+            
+            // Cargar productos de la categoría
             const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
-            const hombreProducts = products.filter(p => p.category === 'hombre');
+            const categoryProducts = products.filter(p => p.category === currentCategory);
             
             const container = document.getElementById('productsContainer');
             
-            if (hombreProducts.length > 0) {
-                container.innerHTML = hombreProducts.map(product => `
+            if (categoryProducts.length > 0) {
+                container.innerHTML = categoryProducts.map(product => `
                     <div class="product-card" data-id="${product.id}">
                         <div class="product-img" style="background-image: url('${product.image}')"></div>
                         <div class="product-content">
@@ -252,6 +298,19 @@
                         </div>
                     </div>
                 `).join('');
+                
+                // Añadir event listeners a los botones de carrito
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productCard = this.closest('.product-card');
+                        const productId = parseInt(productCard.dataset.id);
+                        const product = categoryProducts.find(p => p.id === productId);
+                        
+                        if (product && shoppingCart) {
+                            shoppingCart.addProduct(product);
+                        }
+                    });
+                });
             } else {
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
@@ -269,8 +328,97 @@
                 menuToggle.addEventListener('click', () => {
                     navMenu.classList.toggle('active');
                 });
+                
+                document.querySelectorAll('nav a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navMenu.classList.remove('active');
+                    });
+                });
             }
         });
+        
+        // Clase ShoppingCart (la misma del index.html, pero simplificada para las páginas de categoría)
+        class ShoppingCart {
+            constructor() {
+                this.cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
+                this.updateCartCount();
+                this.setupEventListeners();
+            }
+            
+            updateCartCount() {
+                const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+                const cartCountElement = document.getElementById('cartCount');
+                if (cartCountElement) {
+                    cartCountElement.textContent = totalItems;
+                }
+            }
+            
+            setupEventListeners() {
+                const openCartBtn = document.getElementById('openCart');
+                if (openCartBtn) {
+                    openCartBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        // Redirigir al index.html para ver el carrito completo
+                        window.location.href = 'index.html#cart';
+                    });
+                }
+            }
+            
+            addProduct(product) {
+                const cartProduct = {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: 1
+                };
+                
+                const existingProductIndex = this.cart.findIndex(item => item.id === product.id);
+                
+                if (existingProductIndex !== -1) {
+                    this.cart[existingProductIndex].quantity += 1;
+                } else {
+                    this.cart.push(cartProduct);
+                }
+                
+                localStorage.setItem('modaEleganteCart', JSON.stringify(this.cart));
+                this.updateCartCount();
+                this.showAddedMessage(product.name);
+            }
+            
+            showAddedMessage(productName) {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: #27ae60;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    display: flex;
+                    align-items: center;
+                `;
+                message.innerHTML = `
+                    <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 20px;"></i>
+                    <div>
+                        <strong>¡Producto añadido!</strong><br>
+                        ${productName}
+                    </div>
+                `;
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    message.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        message.remove();
+                    }, 300);
+                }, 3000);
+            }
+        }
     </script>
 </body>
 </html>
