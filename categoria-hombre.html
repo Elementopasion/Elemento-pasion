@@ -321,7 +321,7 @@
         
         // Usar localStorage para productos (más simple)
         // Cambia a Google Sheets cuando tengas la API configurada
-        const USE_GOOGLE_SHEETS = false;
+        const USE_GOOGLE_SHEETS = true;
         
         // ============================================
         // SISTEMA DE PRODUCTOS
@@ -335,12 +335,12 @@
             try {
                 if (USE_GOOGLE_SHEETS) {
                     // Código para Google Sheets
-                    /*
-                    const API_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI';
+                    
+                    const API_URL = 'https://script.google.com/macros/s/AKfycbw8JwATx0zkB8RMftkpjMMQ6qrwqfAJ_xLM-bk_D5Dbl_zWGf3aS6w5jwWx7xjV6QDYdQ/exec';
                     const response = await fetch(`${API_URL}?action=getProducts`);
                     const todosProductos = await response.json();
                     productosHombre = todosProductos.filter(p => p.category === 'hombre');
-                    */
+                    
                 } else {
                     // Usar localStorage
                     const todosProductos = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
