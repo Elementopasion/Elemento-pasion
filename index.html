@@ -911,7 +911,7 @@
         
         // ¡IMPORTANTE! Cambia esta URL por la de TU Google Apps Script
         // O usa localStorage si no tienes Google Sheets configurado
-        const USE_GOOGLE_SHEETS = false; // Cambia a true cuando tengas la API
+        const USE_GOOGLE_SHEETS = true; // Cambia a true cuando tengas la API
         
         // ============================================
         // SISTEMA DE PRODUCTOS
@@ -938,8 +938,8 @@
                     }
                     
                     // Código para Google Sheets (comentado por ahora)
-                    /*
-                    const API_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI';
+                    
+                    const API_URL = 'https://script.google.com/macros/s/AKfycbw8JwATx0zkB8RMftkpjMMQ6qrwqfAJ_xLM-bk_D5Dbl_zWGf3aS6w5jwWx7xjV6QDYdQ/exec';
                     const response = await fetch(`${API_URL}?action=getProducts`);
                     const products = await response.json();
                     
@@ -951,7 +951,7 @@
                     }));
                     
                     localStorage.setItem('modaEleganteProducts', JSON.stringify(this.products));
-                    */
+                    
                     
                 } catch (error) {
                     console.error('Error cargando productos:', error);
