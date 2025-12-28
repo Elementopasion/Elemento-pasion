@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moda Elegante - Tienda de Ropa</title>
+    <title>Moda Elegante - Tienda de Ropa Online</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Estilos generales */
@@ -121,7 +121,7 @@
             margin-bottom: 30px;
             max-width: 700px;
             margin-left: auto;
-        margin-right: auto;
+            margin-right: auto;
         }
         
         .btn {
@@ -253,6 +253,197 @@
             background-color: #2980b9;
         }
         
+        /* Modal del carrito */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        
+        .cart-modal.active {
+            display: block;
+        }
+        
+        .cart-header {
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .cart-items {
+            padding: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        
+        .cart-item-details {
+            flex-grow: 1;
+        }
+        
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            background: #f1f1f1;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .quantity-input {
+            width: 40px;
+            text-align: center;
+            border: 1px solid #ddd;
+            margin: 0 10px;
+            padding: 5px;
+        }
+        
+        .remove-item {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .cart-total {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 2px solid #eee;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .total-final {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .checkout-btn:hover {
+            background: #219653;
+        }
+        
+        /* Modal de pago */
+        .checkout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .checkout-modal.active {
+            display: flex;
+        }
+        
+        .checkout-form {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 10px;
+            padding: 30px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .checkout-form h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .checkout-form h3 {
+            margin: 20px 0 10px 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .checkout-form input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .checkout-form input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
         /* Footer */
         footer {
             background-color: #2c3e50;
@@ -346,6 +537,7 @@
             
             nav ul li {
                 margin: 10px 0;
+                margin-left: 0;
             }
             
             .hero h1 {
@@ -354,6 +546,15 @@
             
             .hero p {
                 font-size: 18px;
+            }
+            
+            .cart-modal {
+                max-width: 100%;
+            }
+            
+            .checkout-form {
+                width: 95%;
+                padding: 20px;
             }
         }
     </style>
@@ -373,11 +574,10 @@
                     <li><a href="#inicio">Inicio</a></li>
                     <li><a href="#categorias">Categorías</a></li>
                     <li><a href="#productos">Productos</a></li>
-                    <li><a href="#contacto">Contacto</a></li>
                     <li>
-                        <a href="#" class="cart-icon">
+                        <a href="#" class="cart-icon" id="openCart">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-count">3</span>
+                            <span class="cart-count" id="cartCount">0</span>
                         </a>
                     </li>
                 </ul>
@@ -408,7 +608,7 @@
                 </div>
                 
                 <div class="category-card">
-                    <div class="category-img" style="background-image: url('https://images.unsplash.com/photo-1520975916090-3105956dac38?ixlib=rb-1.2.1&auto=format&fit=crop&w-800&q=80');"></div>
+                    <div class="category-img" style="background-image: url('https://images.unsplash.com/photo-1520975916090-3105956dac38?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
                     <div class="category-content">
                         <h3>Ropa de Hombre</h3>
                         <p>Camisas, jeans, chaquetas y accesorios para el hombre contemporáneo.</p>
@@ -439,7 +639,7 @@
         <div class="container">
             <h2 class="section-title">Productos Destacados</h2>
             <div class="products-grid">
-                <div class="product-card">
+                <div class="product-card" data-id="1">
                     <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
                     <div class="product-content">
                         <h3 class="product-title">Vestido Elegante Negro</h3>
@@ -455,7 +655,7 @@
                     </div>
                 </div>
                 
-                <div class="product-card">
+                <div class="product-card" data-id="2">
                     <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
                     <div class="product-content">
                         <h3 class="product-title">Camisa de Hombre Casual</h3>
@@ -471,7 +671,7 @@
                     </div>
                 </div>
                 
-                <div class="product-card">
+                <div class="product-card" data-id="3">
                     <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
                     <div class="product-content">
                         <h3 class="product-title">Chaqueta de Cuero</h3>
@@ -487,7 +687,7 @@
                     </div>
                 </div>
                 
-                <div class="product-card">
+                <div class="product-card" data-id="4">
                     <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
                     <div class="product-content">
                         <h3 class="product-title">Zapatos Deportivos</h3>
@@ -499,6 +699,38 @@
                             <i class="far fa-star"></i>
                         </div>
                         <p class="product-price">$59.99</p>
+                        <button class="add-to-cart">Añadir al Carrito</button>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-id="5">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
+                    <div class="product-content">
+                        <h3 class="product-title">Falda Larga Estampada</h3>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="product-price">$39.99</p>
+                        <button class="add-to-cart">Añadir al Carrito</button>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-id="6">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
+                    <div class="product-content">
+                        <h3 class="product-title">Bolso de Cuero Marrón</h3>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="product-price">$45.99</p>
                         <button class="add-to-cart">Añadir al Carrito</button>
                     </div>
                 </div>
@@ -547,6 +779,7 @@
                         <li><i class="fas fa-map-marker-alt"></i> Calle Moda 123, Ciudad</li>
                         <li><i class="fas fa-phone"></i> +1 234 567 890</li>
                         <li><i class="fas fa-envelope"></i> info@modaelegante.com</li>
+                        <li><i class="fab fa-whatsapp"></i> +1 234 567 891</li>
                     </ul>
                 </div>
             </div>
@@ -557,42 +790,523 @@
         </div>
     </footer>
 
-    <script>
-        // Menú responsive
-        const menuToggle = document.getElementById('menuToggle');
-        const navMenu = document.getElementById('navMenu');
+    <!-- Modal del Carrito -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>Tu Carrito de Compras</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
         
-        menuToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
+        <div class="cart-items" id="cartItems">
+            <!-- Los productos del carrito se insertarán aquí -->
+            <div class="empty-cart" id="emptyCart" style="text-align: center; padding: 40px;">
+                <p>Tu carrito está vacío</p>
+                <p style="margin-top: 10px; color: #666;">Añade algunos productos para empezar</p>
+            </div>
+        </div>
         
-        // Cerrar menú al hacer clic en un enlace
-        const navLinks = document.querySelectorAll('nav ul li a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('active');
-            });
-        });
-        
-        // Funcionalidad del carrito
-        const addToCartButtons = document.querySelectorAll('.add-to-cart');
-        const cartCount = document.querySelector('.cart-count');
-        let count = 3;
-        
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                count++;
-                cartCount.textContent = count;
+        <div class="cart-total" id="cartTotal" style="display: none;">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span id="subtotal">$0.00</span>
+            </div>
+            <div class="total-row">
+                <span>Envío:</span>
+                <span id="shipping">$5.99</span>
+            </div>
+            <div class="total-row total-final">
+                <span>Total:</span>
+                <span id="total">$0.00</span>
+            </div>
+            
+            <button class="checkout-btn" id="checkoutBtn">Proceder al Pago</button>
+        </div>
+    </div>
+
+    <!-- Modal de Pago -->
+    <div class="checkout-modal" id="checkoutModal">
+        <div class="checkout-form">
+            <h2>Finalizar Compra</h2>
+            <form id="paymentForm">
+                <div style="margin: 20px 0;">
+                    <h3>Información de Contacto</h3>
+                    <input type="email" placeholder="Correo electrónico *" required id="customerEmail">
+                    <input type="tel" placeholder="Teléfono *" required id="customerPhone">
+                </div>
                 
-                // Efecto visual
-                button.textContent = "¡Añadido!";
-                button.style.backgroundColor = "#27ae60";
+                <div style="margin: 20px 0;">
+                    <h3>Información de Envío</h3>
+                    <input type="text" placeholder="Nombre completo *" required id="customerName">
+                    <input type="text" placeholder="Dirección *" required id="customerAddress">
+                    <input type="text" placeholder="Ciudad *" required id="customerCity">
+                    <input type="text" placeholder="Código Postal *" required id="customerPostalCode">
+                    <textarea placeholder="Notas adicionales (opcional)" rows="3" id="customerNotes" style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"></textarea>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h3>Método de Pago</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                        <p style="margin-bottom: 10px;"><strong>Método actual:</strong> Pago por transferencia/efectivo</p>
+                        <p>Para completar la compra, te contactaremos por WhatsApp para coordinar el pago y envío.</p>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60;">
+                        <p><strong>Total a pagar: </strong><span id="finalTotal" style="font-size: 24px; font-weight: bold; color: #e74c3c;">$0.00</span></p>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <p><strong>⚠ Importante:</strong> Al completar el pedido, se abrirá WhatsApp con el resumen de tu compra. Deberás enviar el mensaje para que procesemos tu orden.</p>
+                </div>
+                
+                <button type="submit" style="background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: 600;">
+                    <i class="fab fa-whatsapp"></i> Completar Pedido por WhatsApp
+                </button>
+                
+                <button type="button" id="cancelCheckout" style="background: #e74c3c; color: white; border: none; padding: 15px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 16px;">
+                    Cancelar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de Carrito Mejorado
+        class ShoppingCart {
+            constructor() {
+                this.cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
+                this.init();
+            }
+            
+            init() {
+                this.updateCartCount();
+                this.setupEventListeners();
+                this.renderCartOnLoad();
+            }
+            
+            setupEventListeners() {
+                // Botón abrir carrito
+                document.getElementById('openCart').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.openCart();
+                });
+                
+                // Botón cerrar carrito
+                document.getElementById('closeCart').addEventListener('click', () => {
+                    this.closeCart();
+                });
+                
+                // Botón checkout
+                document.getElementById('checkoutBtn').addEventListener('click', () => {
+                    this.openCheckout();
+                });
+                
+                // Cancelar checkout
+                document.getElementById('cancelCheckout').addEventListener('click', () => {
+                    this.closeCheckout();
+                });
+                
+                // Formulario de pago
+                document.getElementById('paymentForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.completeOrder();
+                });
+                
+                // Menú responsive
+                document.getElementById('menuToggle').addEventListener('click', () => {
+                    document.getElementById('navMenu').classList.toggle('active');
+                });
+                
+                // Cerrar menú al hacer clic en enlaces
+                document.querySelectorAll('nav a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        document.getElementById('navMenu').classList.remove('active');
+                    });
+                });
+                
+                // Añadir productos al carrito
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('add-to-cart') || 
+                        e.target.closest('.add-to-cart')) {
+                        const productCard = e.target.closest('.product-card');
+                        this.addProduct(productCard);
+                    }
+                });
+                
+                // Cerrar modales al hacer clic fuera
+                document.addEventListener('click', (e) => {
+                    if (e.target.id === 'cartModal') {
+                        this.closeCart();
+                    }
+                    if (e.target.id === 'checkoutModal') {
+                        this.closeCheckout();
+                    }
+                });
+            }
+            
+            addProduct(productCard) {
+                const product = {
+                    id: productCard.dataset.id,
+                    name: productCard.querySelector('.product-title').textContent,
+                    price: parseFloat(productCard.querySelector('.product-price').textContent.replace('$', '')),
+                    image: productCard.querySelector('.product-img').style.backgroundImage.replace('url("', '').replace('")', ''),
+                    quantity: 1
+                };
+                
+                // Verificar si el producto ya está en el carrito
+                const existingProductIndex = this.cart.findIndex(item => item.id === product.id);
+                
+                if (existingProductIndex !== -1) {
+                    this.cart[existingProductIndex].quantity += 1;
+                } else {
+                    this.cart.push(product);
+                }
+                
+                this.saveCart();
+                this.updateCartCount();
+                this.showAddedMessage(product.name);
+                
+                // Si el carrito está abierto, actualizarlo
+                if (document.getElementById('cartModal').classList.contains('active')) {
+                    this.renderCart();
+                }
+            }
+            
+            showAddedMessage(productName) {
+                // Crear mensaje flotante
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: #27ae60;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    display: flex;
+                    align-items: center;
+                `;
+                message.innerHTML = `
+                    <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 20px;"></i>
+                    <div>
+                        <strong>¡Producto añadido!</strong><br>
+                        ${productName}
+                    </div>
+                `;
+                document.body.appendChild(message);
+                
+                // Añadir animación CSS
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
                 
                 setTimeout(() => {
-                    button.textContent = "Añadir al Carrito";
-                    button.style.backgroundColor = "#3498db";
-                }, 1500);
+                    message.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        message.remove();
+                        style.remove();
+                    }, 300);
+                }, 3000);
+            }
+            
+            saveCart() {
+                localStorage.setItem('modaEleganteCart', JSON.stringify(this.cart));
+            }
+            
+            updateCartCount() {
+                const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+                document.getElementById('cartCount').textContent = totalItems;
+            }
+            
+            openCart() {
+                document.getElementById('cartModal').classList.add('active');
+                this.renderCart();
+            }
+            
+            closeCart() {
+                document.getElementById('cartModal').classList.remove('active');
+            }
+            
+            renderCartOnLoad() {
+                // Si hay productos en el carrito, actualizar contador
+                if (this.cart.length > 0) {
+                    this.updateCartCount();
+                }
+            }
+            
+            renderCart() {
+                const cartItemsContainer = document.getElementById('cartItems');
+                const cartTotalContainer = document.getElementById('cartTotal');
+                const emptyCartMessage = document.getElementById('emptyCart');
+                
+                if (this.cart.length === 0) {
+                    emptyCartMessage.style.display = 'block';
+                    cartTotalContainer.style.display = 'none';
+                    cartItemsContainer.innerHTML = '';
+                    cartItemsContainer.appendChild(emptyCartMessage);
+                    return;
+                }
+                
+                emptyCartMessage.style.display = 'none';
+                cartTotalContainer.style.display = 'block';
+                
+                // Renderizar productos
+                cartItemsContainer.innerHTML = '';
+                let subtotal = 0;
+                
+                this.cart.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'cart-item';
+                    itemElement.innerHTML = `
+                        <div class="cart-item-img" style="background-image: url('${item.image}')"></div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                            <div class="cart-item-quantity">
+                                <button class="quantity-btn minus" data-index="${index}">-</button>
+                                <input type="number" class="quantity-input" value="${item.quantity}" min="1" data-index="${index}">
+                                <button class="quantity-btn plus" data-index="${index}">+</button>
+                            </div>
+                        </div>
+                        <button class="remove-item" data-index="${index}" title="Eliminar producto">&times;</button>
+                    `;
+                    
+                    cartItemsContainer.appendChild(itemElement);
+                    subtotal += item.price * item.quantity;
+                });
+                
+                // Calcular totales
+                const shipping = 5.99;
+                const total = subtotal + shipping;
+                
+                document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+                document.getElementById('shipping').textContent = `$${shipping.toFixed(2)}`;
+                document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+                
+                // Event listeners para los controles del carrito
+                this.setupCartControls();
+            }
+            
+            setupCartControls() {
+                // Botones de cantidad
+                document.querySelectorAll('.quantity-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        if (e.target.classList.contains('plus')) {
+                            this.cart[index].quantity += 1;
+                        } else if (e.target.classList.contains('minus')) {
+                            if (this.cart[index].quantity > 1) {
+                                this.cart[index].quantity -= 1;
+                            } else {
+                                // Si la cantidad es 1 y se hace clic en menos, eliminar producto
+                                this.cart.splice(index, 1);
+                            }
+                        }
+                        this.saveCart();
+                        this.updateCartCount();
+                        this.renderCart();
+                    });
+                });
+                
+                // Inputs de cantidad
+                document.querySelectorAll('.quantity-input').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        const newQuantity = parseInt(e.target.value);
+                        if (newQuantity >= 1) {
+                            this.cart[index].quantity = newQuantity;
+                            this.saveCart();
+                            this.updateCartCount();
+                            this.renderCart();
+                        } else {
+                            e.target.value = this.cart[index].quantity;
+                        }
+                    });
+                });
+                
+                // Botones eliminar
+                document.querySelectorAll('.remove-item').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        this.cart.splice(index, 1);
+                        this.saveCart();
+                        this.updateCartCount();
+                        this.renderCart();
+                    });
+                });
+            }
+            
+            openCheckout() {
+                this.closeCart();
+                document.getElementById('checkoutModal').classList.add('active');
+                // Actualizar total en checkout
+                const totalElement = document.getElementById('total');
+                const finalTotalElement = document.getElementById('finalTotal');
+                finalTotalElement.textContent = totalElement.textContent;
+                
+                // Limpiar formulario
+                document.getElementById('paymentForm').reset();
+            }
+            
+            closeCheckout() {
+                document.getElementById('checkoutModal').classList.remove('active');
+            }
+            
+            completeOrder() {
+                // Obtener datos del formulario
+                const email = document.getElementById('customerEmail').value;
+                const phone = document.getElementById('customerPhone').value;
+                const name = document.getElementById('customerName').value;
+                const address = document.getElementById('customerAddress').value;
+                const city = document.getElementById('customerCity').value;
+                const postalCode = document.getElementById('customerPostalCode').value;
+                const notes = document.getElementById('customerNotes').value;
+                
+                // Validar que hay productos en el carrito
+                if (this.cart.length === 0) {
+                    alert('Tu carrito está vacío. Añade productos antes de completar el pedido.');
+                    this.closeCheckout();
+                    return;
+                }
+                
+                // Crear resumen del pedido
+                let orderSummary = `*🛍️ NUEVO PEDIDO - MODA ELEGANTE*%0A%0A`;
+                orderSummary += `*📋 Datos del Cliente:*%0A`;
+                orderSummary += `• *Nombre:* ${name}%0A`;
+                orderSummary += `• *Email:* ${email}%0A`;
+                orderSummary += `• *Teléfono:* ${phone}%0A`;
+                orderSummary += `• *Dirección:* ${address}, ${city}, ${postalCode}%0A`;
+                if (notes) {
+                    orderSummary += `• *Notas:* ${notes}%0A`;
+                }
+                
+                orderSummary += `%0A*🛒 Productos del Pedido:*%0A`;
+                
+                let subtotal = 0;
+                this.cart.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    orderSummary += `%0A*Producto ${index + 1}:*%0A`;
+                    orderSummary += `• ${item.name}%0A`;
+                    orderSummary += `• Cantidad: ${item.quantity}%0A`;
+                    orderSummary += `• Precio unitario: $${item.price.toFixed(2)}%0A`;
+                    orderSummary += `• Total: *$${itemTotal.toFixed(2)}*%0A`;
+                    subtotal += itemTotal;
+                });
+                
+                const shipping = 5.99;
+                const total = subtotal + shipping;
+                
+                orderSummary += `%0A*💰 Resumen de Pago:*%0A`;
+                orderSummary += `• Subtotal: $${subtotal.toFixed(2)}%0A`;
+                orderSummary += `• Envío: $${shipping.toFixed(2)}%0A`;
+                orderSummary += `• *TOTAL A PAGAR: $${total.toFixed(2)}*%0A%0A`;
+                
+                orderSummary += `*📅 Fecha del pedido:* ${new Date().toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}`;
+                
+                orderSummary += `%0A%0A_Pedido ID: ${Date.now()}_`;
+                
+                // Número de WhatsApp - ¡CÁMBIALO POR TU NÚMERO REAL!
+                // Formato: código de país + número (sin +, espacios o guiones)
+                // Ejemplo para Argentina: 5491112345678
+                // Ejemplo para México: 5215512345678
+                // Ejemplo para España: 34612345678
+                const whatsappNumber = "5491112345678"; // <-- ¡CAMBIAR POR TU NÚMERO!
+                
+                // Crear enlace de WhatsApp
+                const whatsappLink = `https://wa.me/${whatsappNumber}?text=${orderSummary}`;
+                
+                // Mostrar confirmación
+                const confirmMessage = `¡Pedido creado exitosamente!%0A%0A`;
+                const finalWhatsappLink = `https://wa.me/${whatsappNumber}?text=${confirmMessage}${orderSummary}`;
+                
+                // Abrir WhatsApp
+                window.open(finalWhatsappLink, '_blank');
+                
+                // Guardar pedido en localStorage (historial)
+                this.saveOrderHistory(email, name, total);
+                
+                // Limpiar carrito
+                this.clearCart();
+                
+                // Cerrar modal
+                this.closeCheckout();
+                
+                // Mostrar mensaje de agradecimiento
+                setTimeout(() => {
+                    alert('¡Gracias por tu pedido! Se ha abierto WhatsApp con el resumen de tu compra. Por favor, envía el mensaje para procesar tu orden.');
+                }, 500);
+            }
+            
+            saveOrderHistory(email, name, total) {
+                const order = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    customer: { email, name },
+                    items: [...this.cart],
+                    total: total
+                };
+                
+                // Guardar en localStorage
+                const orders = JSON.parse(localStorage.getItem('modaEleganteOrders')) || [];
+                orders.push(order);
+                localStorage.setItem('modaEleganteOrders', JSON.stringify(orders));
+            }
+            
+            clearCart() {
+                this.cart = [];
+                this.saveCart();
+                this.updateCartCount();
+                this.renderCart();
+            }
+        }
+
+        // Inicializar carrito cuando la página cargue
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = new ShoppingCart();
+            
+            // Animación suave para enlaces internos
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
             });
+        });
+        
+        // Prevenir que el formulario se envíe con Enter fuera de los inputs
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
         });
     </script>
 </body>
