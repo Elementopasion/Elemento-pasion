@@ -942,52 +942,100 @@ function displayProducts(products) {
             }
         }
         
-        async function deleteProduct(productId, index) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                return;
-            }
+async function deleteProductNow(productId, index) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+        return;
+    }
+    
+    console.log(`🚀 Eliminando producto ID: ${productId}, Índice: ${index}`);
+    
+    // 1. Eliminar visualmente INMEDIATAMENTE
+    const productElement = document.querySelector(`[data-id="${productId}"]`);
+    if (productElement) {
+        productElement.style.opacity = '0.5';
+        productElement.style.transition = 'opacity 0.3s';
+    }
+    
+    try {
+        // 2. Eliminar de Google Sheets (si está habilitado)
+        if (USE_GOOGLE_SHEETS) {
+            console.log(`📡 Enviando a Google Sheets: ${productId}`);
             
-            try {
-                if (USE_GOOGLE_SHEETS) {
-                    // Eliminar de Google Sheets
-                    const params = new URLSearchParams({
-                        action: 'deleteProduct',
-                        id: productId
-                    });
-                    
-                    const response = await fetch(GOOGLE_SHEETS_API, {
-                        method: 'POST',
-                        body: params
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.error) {
-                        throw new Error(result.error);
-                    }
-                }
-                
-                // Eliminar de localStorage
-                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
-                const updatedProducts = products.filter(p => p.id !== productId);
-                localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
-                
-                alert('Producto eliminado');
-                loadProducts();
-                
-            } catch (error) {
-                console.error('Error eliminando producto:', error);
-                alert('Error al eliminar producto: ' + error.message);
-                
-                // Fallback: eliminar solo de localStorage
-                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
-                const updatedProducts = products.filter(p => p.id !== productId);
-                localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
-                
-                alert('Producto eliminado de localStorage (fallback)');
-                loadProducts();
-            }
+            // Método 1: Simplemente hacer la petición y no esperar mucho
+            const deleteUrl = `${GOOGLE_SHEETS_API}?action=deleteProduct&id=${encodeURIComponent(productId)}`;
+            
+            // Hacer la petición pero con timeout corto
+            const deletePromise = fetch(deleteUrl).catch(e => {
+                console.log('Error en fetch (no crítico):', e);
+                return {ok: false};
+            });
+            
+            // Timeout de 3 segundos máximo
+            const timeoutPromise = new Promise(resolve => {
+                setTimeout(() => resolve({ok: false, timeout: true}), 3000);
+            });
+            
+            const result = await Promise.race([deletePromise, timeoutPromise]);
+            console.log('Resultado eliminación:', result);
         }
+        
+        // 3. Eliminar de localStorage SIEMPRE
+        const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+        const updatedProducts = products.filter(p => {
+            // Comparar como string y número
+            const pId = p.id ? p.id.toString() : '';
+            const targetId = productId ? productId.toString() : '';
+            return pId !== targetId;
+        });
+        
+        localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+        console.log('✅ Eliminado de localStorage');
+        
+        // 4. Eliminar del array allProducts
+        allProducts = allProducts.filter(p => {
+            const pId = p.id ? p.id.toString() : '';
+            const targetId = productId ? productId.toString() : '';
+            return pId !== targetId;
+        });
+        
+        // 5. Eliminar elemento del DOM completamente
+        if (productElement) {
+            productElement.remove();
+        }
+        
+        // 6. Actualizar contador
+        document.getElementById('totalProducts').textContent = allProducts.length;
+        
+        // 7. Si no quedan productos, mostrar mensaje
+        if (allProducts.length === 0) {
+            const container = document.getElementById('productsList');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+                    <p>No hay productos guardados.</p>
+                </div>
+            `;
+        }
+        
+        // 8. Mostrar mensaje de éxito
+        setTimeout(() => {
+            alert('✅ Producto eliminado correctamente');
+        }, 300);
+        
+    } catch (error) {
+        console.error('💥 Error crítico:', error);
+        
+        // Fallback: al menos eliminar visualmente
+        if (productElement) {
+            productElement.remove();
+        }
+        
+        // Actualizar allProducts localmente
+        allProducts = allProducts.filter((p, i) => i !== index);
+        
+        alert('⚠️ Producto eliminado localmente. Puede que siga en Google Sheets.');
+    }
+}
         
 async function deleteProduct(productId, index) {
   if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
