@@ -615,23 +615,28 @@ function displayProducts(products) {
         return;
     }
     
+    // URL de placeholder que SÍ existe
+    const PLACEHOLDER_URL = 'https://via.placeholder.com/80.png/cccccc/666666?text=No+img';
+    
     container.innerHTML = products.map((product, index) => {
-        // Verificar y sanitizar la URL de la imagen
+        // Manejo SEGURO de la imagen
         let imageUrl = product.image || '';
-        let imageErrorHandler = '';
+        let hasValidImage = false;
         
-        if (!imageUrl || imageUrl.trim() === '') {
-            imageUrl = 'https://via.placeholder.com/80?text=Sin+imagen';
-        } else if (!imageUrl.startsWith('http')) {
-            imageUrl = 'https://via.placeholder.com/80?text=URL+inválida';
-        } else {
-            // Si es una URL válida, agregar manejador de error
-            imageErrorHandler = `onerror="this.src='https://via.placeholder.com/80?text=Error+cargando'"`;
+        // Verificar si es una URL válida
+        if (imageUrl && 
+            typeof imageUrl === 'string' && 
+            imageUrl.trim() !== '' && 
+            (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:'))) {
+            hasValidImage = true;
         }
         
         return `
-            <div class="product-item" id="product-${product.id}">
-                <img src="${imageUrl}" class="product-image" alt="${product.name}" ${imageErrorHandler}>
+            <div class="product-item" data-id="${product.id}" data-index="${index}">
+                <img src="${hasValidImage ? imageUrl : PLACEHOLDER_URL}" 
+                     class="product-image" 
+                     alt="${product.name}"
+                     onerror="if(this.src !== '${PLACEHOLDER_URL}') this.src='${PLACEHOLDER_URL}'; this.onerror=null;">
                 <div class="product-info">
                     <div class="product-name">${product.name}</div>
                     <div class="product-meta">
@@ -645,26 +650,13 @@ function displayProducts(products) {
                     <button class="btn-secondary" onclick="editProduct(${index})">
                         <i class="fas fa-edit"></i> Editar
                     </button>
-                    <button class="btn-danger" onclick="deleteProduct('${product.id}', ${index})">
+                    <button class="btn-danger" onclick="deleteProductNow('${product.id}', ${index})">
                         <i class="fas fa-trash"></i> Eliminar
                     </button>
                 </div>
             </div>
         `;
     }).join('');
-    
-    // Limpiar cualquier evento pendiente de imágenes
-    setTimeout(() => {
-        const images = container.querySelectorAll('img');
-        images.forEach(img => {
-            if (!img.complete || img.naturalHeight === 0) {
-                img.onerror = function() {
-                    this.src = 'https://via.placeholder.com/80?text=Error+cargando';
-                    this.onerror = null; // Prevenir bucles
-                };
-            }
-        });
-    }, 100);
 }
         
         function getCategoryName(categoryCode) {
