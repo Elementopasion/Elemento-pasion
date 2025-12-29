@@ -271,6 +271,7 @@
             object-fit: cover;
             border-radius: 5px;
             margin-right: 15px;
+            background-color: #f8f9fa;
         }
         
         .product-info {
@@ -499,7 +500,7 @@
         // ============================================
         
         const ADMIN_PASSWORD = "admin123";
-        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx174S9QlKMHYkSJGaTioLCKLM8HZZvE8AZ_jHrQll_VVjSskod7mw0EfbDxM4snV-25g/exec";
+        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx0yL1U9ONcWKNDCyZ7R9WHAKGi-qhcX-dpmtOWG7U29HDjMH0v5VMBPgKxAYUNfDsOSQ/exec";
         const USE_GOOGLE_SHEETS = true; // Cambia a false si quieres solo localStorage
         
         let allProducts = [];
@@ -542,60 +543,61 @@
         // ============================================
         
         async function deleteAllProducts() {
-    if (!confirm('⚠️ ¿ELIMINAR TODOS LOS PRODUCTOS?\n\nEsta acción no se puede deshacer.')) {
-        return;
-    }
-    
-    if (!confirm('⛔ CONFIRMACIÓN FINAL: Esto borrará TODOS los productos permanentemente.')) {
-        return;
-    }
-    
-    try {
-        // Limpiar visualmente
-        const container = document.getElementById('productsList');
-        container.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="spinner"></div><p>Eliminando todos los productos...</p></div>';
-        
-        if (USE_GOOGLE_SHEETS) {
-            // Eliminar de Google Sheets
-            await fetch(`${GOOGLE_SHEETS_API}?action=deleteAll`);
+            if (!confirm('⚠️ ¿ELIMINAR TODOS LOS PRODUCTOS?\n\nEsta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            if (!confirm('⛔ CONFIRMACIÓN FINAL: Esto borrará TODOS los productos permanentemente.')) {
+                return;
+            }
+            
+            try {
+                // Limpiar visualmente
+                const container = document.getElementById('productsList');
+                container.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="spinner"></div><p>Eliminando todos los productos...</p></div>';
+                
+                if (USE_GOOGLE_SHEETS) {
+                    // Eliminar de Google Sheets usando GET simple
+                    await fetch(`${GOOGLE_SHEETS_API}?action=deleteAll`);
+                }
+                
+                // Eliminar de localStorage
+                localStorage.removeItem('modaEleganteProducts');
+                allProducts = [];
+                
+                // Mostrar estado vacío
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #27ae60;"></i>
+                        <p>Todos los productos han sido eliminados.</p>
+                    </div>
+                `;
+                
+                document.getElementById('totalProducts').textContent = '0';
+                
+                alert('✅ Todos los productos eliminados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Fallback
+                localStorage.removeItem('modaEleganteProducts');
+                allProducts = [];
+                
+                const container = document.getElementById('productsList');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #27ae60;"></i>
+                        <p>Todos los productos han sido eliminados (localmente).</p>
+                    </div>
+                `;
+                
+                document.getElementById('totalProducts').textContent = '0';
+                
+                alert('⚠️ Productos eliminados localmente. Puede que sigan en Google Sheets.');
+            }
         }
         
-        // Eliminar de localStorage
-        localStorage.removeItem('modaEleganteProducts');
-        allProducts = [];
-        
-        // Mostrar estado vacío
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #27ae60;"></i>
-                <p>Todos los productos han sido eliminados.</p>
-            </div>
-        `;
-        
-        document.getElementById('totalProducts').textContent = '0';
-        
-        alert('✅ Todos los productos eliminados correctamente');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        
-        // Fallback
-        localStorage.removeItem('modaEleganteProducts');
-        allProducts = [];
-        
-        const container = document.getElementById('productsList');
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #27ae60;"></i>
-                <p>Todos los productos han sido eliminados (localmente).</p>
-            </div>
-        `;
-        
-        document.getElementById('totalProducts').textContent = '0';
-        
-        alert('⚠️ Productos eliminados localmente. Puede que sigan en Google Sheets.');
-    }
-}
         async function loadProducts() {
             const container = document.getElementById('productsList');
             container.innerHTML = `
@@ -653,66 +655,72 @@
             }
         }
         
-function displayProducts(products) {
-    const container = document.getElementById('productsList');
-    const totalElement = document.getElementById('totalProducts');
-    
-    totalElement.textContent = products.length;
-    
-    if (products.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
-                <p>No hay productos guardados.</p>
-                <p>Agrega tu primer producto en la pestaña "Agregar Producto".</p>
-            </div>
-        `;
-        return;
-    }
-    
-    const PLACEHOLDER_URL = 'https://via.placeholder.com/80.png/cccccc/666666?text=No+img';
-    
-    container.innerHTML = products.map((product, index) => {
-        // Asegurarse de que el ID existe y es string
-        const productId = product.id ? product.id.toString() : Date.now().toString();
-        
-        let imageUrl = product.image || '';
-        let hasValidImage = false;
-        
-        if (imageUrl && 
-            typeof imageUrl === 'string' && 
-            imageUrl.trim() !== '' && 
-            (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:'))) {
-            hasValidImage = true;
-        }
-        
-        return `
-            <div class="product-item" data-id="${productId}" data-index="${index}">
-                <img src="${hasValidImage ? imageUrl : PLACEHOLDER_URL}" 
-                     class="product-image" 
-                     alt="${product.name}"
-                     onerror="if(this.src !== '${PLACEHOLDER_URL}') this.src='${PLACEHOLDER_URL}'; this.onerror=null;">
-                <div class="product-info">
-                    <div class="product-name">${product.name}</div>
-                    <div class="product-meta">
-                        Categoría: ${getCategoryName(product.category)} | 
-                        Precio: $${parseFloat(product.price || 0).toFixed(2)} | 
-                        ${product.featured === true || product.featured === 'true' ? '⭐ Destacado' : 'Normal'}
+        function displayProducts(products) {
+            const container = document.getElementById('productsList');
+            const totalElement = document.getElementById('totalProducts');
+            
+            totalElement.textContent = products.length;
+            
+            if (products.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+                        <p>No hay productos guardados.</p>
+                        <p>Agrega tu primer producto en la pestaña "Agregar Producto".</p>
                     </div>
-                    ${product.description ? `<div style="font-size: 13px; color: #888; margin-top: 5px;">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
-                </div>
-                <div class="product-actions">
-                    <button class="btn-secondary" onclick="editProduct(${index})">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                    <button class="btn-danger" onclick="deleteProductNow('${productId}', ${index})">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+                `;
+                return;
+            }
+            
+            // Nueva URL de placeholder que SÍ funciona
+            const PLACEHOLDER_URL = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23cccccc"/><text x="50%" y="50%" font-family="Arial" font-size="10" fill="%23666666" text-anchor="middle" dy=".3em">Sin imagen</text></svg>';
+            
+            container.innerHTML = products.map((product, index) => {
+                // Asegurarse de que el ID existe y es string
+                const productId = product.id ? product.id.toString() : Date.now().toString();
+                
+                // Manejo SEGURO de la imagen
+                let imageUrl = product.image || '';
+                let hasValidImage = false;
+                
+                // Verificar si es una URL válida
+                if (imageUrl && 
+                    typeof imageUrl === 'string' && 
+                    imageUrl.trim() !== '' && 
+                    (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:'))) {
+                    hasValidImage = true;
+                }
+                
+                // Usar placeholder si no hay imagen válida
+                const displayImage = hasValidImage ? imageUrl : PLACEHOLDER_URL;
+                
+                return `
+                    <div class="product-item" data-id="${productId}" data-index="${index}">
+                        <img src="${displayImage}" 
+                             class="product-image" 
+                             alt="${product.name}"
+                             onerror="this.src='${PLACEHOLDER_URL}'; this.onerror=null;">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-meta">
+                                Categoría: ${getCategoryName(product.category)} | 
+                                Precio: $${parseFloat(product.price || 0).toFixed(2)} | 
+                                ${product.featured === true || product.featured === 'true' ? '⭐ Destacado' : 'Normal'}
+                            </div>
+                            ${product.description ? `<div style="font-size: 13px; color: #888; margin-top: 5px;">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-secondary" onclick="editProduct(${index})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-danger" onclick="deleteProductNow('${productId}', ${index})">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
         
         function getCategoryName(categoryCode) {
             const categories = {
@@ -798,16 +806,9 @@ function displayProducts(products) {
                 let savedId = null;
                 
                 if (USE_GOOGLE_SHEETS && !isEditing) {
-                    // Guardar en Google Sheets
-                    const params = new URLSearchParams({
-                        action: 'addProduct',
-                        ...productData
-                    });
-                    
-                    const response = await fetch(GOOGLE_SHEETS_API, {
-                        method: 'POST',
-                        body: params
-                    });
+                    // Guardar en Google Sheets usando GET simple
+                    const params = new URLSearchParams(productData);
+                    const response = await fetch(`${GOOGLE_SHEETS_API}?action=addProduct&${params.toString()}`);
                     
                     const result = await response.json();
                     
@@ -819,17 +820,10 @@ function displayProducts(products) {
                     status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado en Google Sheets!</span>';
                     
                 } else if (isEditing && editingProductId) {
-                    // Actualizar en Google Sheets
+                    // Actualizar en Google Sheets usando GET simple
                     productData.id = editingProductId;
-                    const params = new URLSearchParams({
-                        action: 'updateProduct',
-                        ...productData
-                    });
-                    
-                    const response = await fetch(GOOGLE_SHEETS_API, {
-                        method: 'POST',
-                        body: params
-                    });
+                    const params = new URLSearchParams(productData);
+                    const response = await fetch(`${GOOGLE_SHEETS_API}?action=updateProduct&${params.toString()}`);
                     
                     const result = await response.json();
                     
@@ -859,7 +853,7 @@ function displayProducts(products) {
                 
                 if (isEditing) {
                     // Actualizar en localStorage
-                    const index = products.findIndex(p => p.id === editingProductId);
+                    const index = products.findIndex(p => p.id.toString() === editingProductId.toString());
                     if (index !== -1) {
                         products[index] = newProduct;
                     }
@@ -903,7 +897,7 @@ function displayProducts(products) {
                 };
                 
                 if (isEditing) {
-                    const index = products.findIndex(p => p.id === editingProductId);
+                    const index = products.findIndex(p => p.id.toString() === editingProductId.toString());
                     if (index !== -1) {
                         products[index] = newProduct;
                     }
@@ -947,6 +941,9 @@ function displayProducts(products) {
             const btn = document.getElementById('addProductBtn');
             btn.innerHTML = '<i class="fas fa-save"></i> Guardar Producto';
             btn.onclick = addNewProduct;
+            
+            isEditing = false;
+            editingProductId = null;
         }
         
         function convertImageToBase64(file) {
@@ -989,7 +986,7 @@ function displayProducts(products) {
                 
                 // Configurar edición
                 isEditing = true;
-                editingProductId = product.id;
+                editingProductId = product.id.toString();
                 
                 openTab('addProduct');
                 
@@ -997,156 +994,96 @@ function displayProducts(products) {
             }
         }
         
-async function deleteProductNow(productId, index) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-        return;
-    }
-    
-    console.log(`🚀 Eliminando producto ID: ${productId}, Índice: ${index}`);
-    
-    // 1. Eliminar visualmente INMEDIATAMENTE
-    const productElement = document.querySelector(`[data-id="${productId}"]`);
-    if (productElement) {
-        productElement.style.opacity = '0.5';
-        productElement.style.transition = 'opacity 0.3s';
-    }
-    
-    try {
-        // 2. Eliminar de Google Sheets (si está habilitado)
-        if (USE_GOOGLE_SHEETS) {
-            console.log(`📡 Enviando a Google Sheets: ${productId}`);
+        async function deleteProductNow(productId, index) {
+            console.log(`🚀 Eliminando producto ID: ${productId}, Índice: ${index}, Tipo: ${typeof productId}`);
             
-            // CORRECCIÓN: Usar POST correctamente
-            const params = new URLSearchParams();
-            params.append('action', 'deleteProduct');
-            params.append('id', productId.toString());
+            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                return;
+            }
             
-            const response = await fetch(GOOGLE_SHEETS_API, {
-                method: 'POST',
-                body: params
-            });
+            // 1. Eliminar visualmente INMEDIATAMENTE
+            const productElement = document.querySelector(`[data-id="${productId}"]`);
+            if (productElement) {
+                productElement.style.opacity = '0.5';
+                productElement.style.transition = 'opacity 0.3s';
+            }
             
-            const result = await response.json();
-            console.log('Resultado eliminación:', result);
-            
-            if (result.error) {
-                throw new Error(result.error);
+            try {
+                // 2. Eliminar de Google Sheets (si está habilitado)
+                if (USE_GOOGLE_SHEETS) {
+                    console.log(`📡 Enviando a Google Sheets: ${productId}`);
+                    
+                    // Usar GET simple en lugar de POST
+                    const deleteUrl = `${GOOGLE_SHEETS_API}?action=deleteProduct&id=${encodeURIComponent(productId)}`;
+                    console.log('URL de eliminación:', deleteUrl);
+                    
+                    const response = await fetch(deleteUrl);
+                    const result = await response.json();
+                    console.log('Resultado eliminación:', result);
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                }
+                
+                // 3. Eliminar de localStorage SIEMPRE
+                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                const updatedProducts = products.filter(p => {
+                    // Comparar como strings
+                    const pId = p.id ? p.id.toString() : '';
+                    const targetId = productId ? productId.toString() : '';
+                    return pId !== targetId;
+                });
+                
+                localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+                console.log('✅ Eliminado de localStorage');
+                
+                // 4. Eliminar del array allProducts
+                allProducts = allProducts.filter(p => {
+                    const pId = p.id ? p.id.toString() : '';
+                    const targetId = productId ? productId.toString() : '';
+                    return pId !== targetId;
+                });
+                
+                // 5. Eliminar elemento del DOM completamente
+                if (productElement) {
+                    productElement.remove();
+                }
+                
+                // 6. Actualizar contador
+                document.getElementById('totalProducts').textContent = allProducts.length;
+                
+                // 7. Si no quedan productos, mostrar mensaje
+                if (allProducts.length === 0) {
+                    const container = document.getElementById('productsList');
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+                            <p>No hay productos guardados.</p>
+                        </div>
+                    `;
+                }
+                
+                // 8. Mostrar mensaje de éxito
+                setTimeout(() => {
+                    alert('✅ Producto eliminado correctamente');
+                }, 300);
+                
+            } catch (error) {
+                console.error('💥 Error crítico:', error);
+                
+                // Fallback: al menos eliminar visualmente
+                if (productElement) {
+                    productElement.remove();
+                }
+                
+                // Actualizar allProducts localmente
+                allProducts = allProducts.filter((p, i) => i !== index);
+                document.getElementById('totalProducts').textContent = allProducts.length;
+                
+                alert('⚠️ Producto eliminado localmente. Error: ' + error.message);
             }
         }
-        
-        // 3. Eliminar de localStorage SIEMPRE
-        const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
-        const updatedProducts = products.filter(p => {
-            // Comparar como strings
-            const pId = p.id ? p.id.toString() : '';
-            const targetId = productId ? productId.toString() : '';
-            return pId !== targetId;
-        });
-        
-        localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
-        console.log('✅ Eliminado de localStorage');
-        
-        // 4. Eliminar del array allProducts
-        allProducts = allProducts.filter(p => {
-            const pId = p.id ? p.id.toString() : '';
-            const targetId = productId ? productId.toString() : '';
-            return pId !== targetId;
-        });
-        
-        // 5. Eliminar elemento del DOM completamente
-        if (productElement) {
-            productElement.remove();
-        }
-        
-        // 6. Actualizar contador
-        document.getElementById('totalProducts').textContent = allProducts.length;
-        
-        // 7. Si no quedan productos, mostrar mensaje
-        if (allProducts.length === 0) {
-            const container = document.getElementById('productsList');
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #666;">
-                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
-                    <p>No hay productos guardados.</p>
-                </div>
-            `;
-        }
-        
-        // 8. Mostrar mensaje de éxito
-        setTimeout(() => {
-            alert('✅ Producto eliminado correctamente');
-        }, 300);
-        
-    } catch (error) {
-        console.error('💥 Error crítico:', error);
-        
-        // Fallback: al menos eliminar visualmente
-        if (productElement) {
-            productElement.remove();
-        }
-        
-        // Actualizar allProducts localmente
-        allProducts = allProducts.filter((p, i) => i !== index);
-        
-        alert('⚠️ Producto eliminado localmente. Puede que siga en Google Sheets. Error: ' + error.message);
-    }
-}
-        
-async function deleteProduct(productId, index) {
-  if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-    return;
-  }
-  
-  try {
-    if (USE_GOOGLE_SHEETS) {
-      // Eliminar de Google Sheets - CORREGIDO
-      const params = new URLSearchParams();
-      params.append('action', 'deleteProduct');
-      params.append('id', productId);
-      
-      console.log('Eliminando producto ID:', productId);
-      console.log('URL:', GOOGLE_SHEETS_API);
-      console.log('Params:', params.toString());
-      
-      const response = await fetch(GOOGLE_SHEETS_API + '?action=deleteProduct&id=' + encodeURIComponent(productId), {
-        method: 'POST',
-        mode: 'no-cors' // Importante para evitar problemas CORS
-      });
-      
-      // Con no-cors no podemos leer la respuesta, pero confiamos en que funcionó
-      console.log('Eliminación enviada a Google Sheets');
-      
-      // También intentar con GET por si acaso
-      await fetch(GOOGLE_SHEETS_API + '?action=deleteProduct&id=' + encodeURIComponent(productId));
-      
-    }
-    
-    // Siempre eliminar de localStorage
-    const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
-    const updatedProducts = products.filter(p => p.id !== productId && p.id !== productId.toString());
-    localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
-    
-    // Actualizar la lista visualmente
-    allProducts = allProducts.filter(p => p.id !== productId && p.id !== productId.toString());
-    displayProducts(allProducts);
-    
-    alert('Producto eliminado correctamente');
-    
-  } catch (error) {
-    console.error('Error eliminando producto:', error);
-    
-    // Fallback: eliminar solo de localStorage
-    const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
-    const updatedProducts = products.filter(p => p.id !== productId && p.id !== productId.toString());
-    localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
-    
-    // Actualizar la lista visualmente
-    allProducts = allProducts.filter(p => p.id !== productId && p.id !== productId.toString());
-    displayProducts(allProducts);
-    
-    alert('Producto eliminado de localStorage');
-  }
-}
         
         function exportProducts() {
             if (allProducts.length === 0) {
