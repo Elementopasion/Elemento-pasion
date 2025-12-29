@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ropa de Niños - Moda Elegante</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ========== ESTILOS GENERALES ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #333;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* ========== HEADER Y NAVEGACIÓN ========== */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e74c3c;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: #3498db;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 25px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: #e74c3c;
+        }
+        
+        .cart-icon {
+            position: relative;
+            font-size: 20px;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .menu-toggle {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* ========== HEADER DE CATEGORÍA ========== */
+        .category-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1539109136881-3be0616acf4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 100px 0;
+            margin-bottom: 50px;
+        }
+        
+        .category-header h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        /* ========== PRODUCTOS ========== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 40px 0;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-img {
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            background-color: #f8f9fa;
+        }
+        
+        .product-content {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .product-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .add-to-cart {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .add-to-cart:hover {
+            background-color: #2980b9;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 30px 0;
+        }
+        
+        /* ========== LOADING SPINNER ========== */
+        .loading-products {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            nav ul li {
+                margin: 10px 0;
+                margin-left: 0;
+            }
+            
+            .category-header h1 {
+                font-size: 36px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">Moda<span>Elegante</span></a>
+            
+            <div class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <nav>
+                <ul id="navMenu">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="categoria-hombre.html">Hombre</a></li>
+                    <li><a href="categoria-mujer.html">Mujer</a></li>
+                    <li><a href="categoria-accesorios.html">Accesorios</a></li>
+                    <li><a href="categoria-ninos.html">Niños</a></li>
+                    <li><a href="categoria-calzado.html">Calzado</a></li>
+                    <li>
+                        <a href="#" class="cart-icon" id="openCart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="category-header">
+        <div class="container">
+            <h1>Ropa de Niños</h1>
+            <p>La mejor ropa para los más pequeños de la casa</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="products-grid" id="productsContainer">
+            <div class="loading-products">
+                <div class="spinner"></div>
+                <p>Cargando productos...</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        
+        const USE_GOOGLE_SHEETS = true;
+        const CATEGORIA = 'ninos';
+        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx174S9QlKMHYkSJGaTioLCKLM8HZZvE8AZ_jHrQll_VVjSskod7mw0EfbDxM4snV-25g/exec";
+        
+        // ============================================
+        // SISTEMA DE PRODUCTOS
+        // ============================================
+        
+        let productosCategoria = [];
+        
+        async function cargarProductos() {
+            const container = document.getElementById('productsContainer');
+            
+            try {
+                if (USE_GOOGLE_SHEETS) {
+                    // Cargar desde Google Sheets
+                    const response = await fetch(`${GOOGLE_SHEETS_API}?action=getProducts`);
+                    const todosProductos = await response.json();
+                    productosCategoria = todosProductos.filter(p => p.category === CATEGORIA);
+                    
+                } else {
+                    // Usar localStorage
+                    const todosProductos = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                    productosCategoria = todosProductos.filter(p => p.category === CATEGORIA);
+                    
+                    // Si no hay productos, mostrar algunos por defecto
+                    if (productosCategoria.length === 0) {
+                        productosCategoria = [
+                            {
+                                id: 9,
+                                name: "Conjunto Infantil Veraniego",
+                                price: 24.99,
+                                category: "ninos",
+                                image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                                description: "Conjunto cómodo para el verano",
+                                featured: true
+                            },
+                            {
+                                id: 10,
+                                name: "Pijama Infantil",
+                                price: 19.99,
+                                category: "ninos",
+                                image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                                description: "Pijama suave y cómoda para dormir",
+                                featured: false
+                            },
+                            {
+                                id: 11,
+                                name: "Chaqueta Infantil",
+                                price: 29.99,
+                                category: "ninos",
+                                image: "https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                                description: "Chaqueta abrigada para el invierno",
+                                featured: false
+                            }
+                        ];
+                    }
+                }
+                
+                mostrarProductos();
+                
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <h3 style="color: #e74c3c; margin-bottom: 20px;">Error de conexión</h3>
+                        <p>No se pudieron cargar los productos. Intenta recargar la página.</p>
+                        <button onclick="cargarProductos()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+                            Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function mostrarProductos() {
+            const container = document.getElementById('productsContainer');
+            
+            if (productosCategoria.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <h3 style="color: #666; margin-bottom: 20px;">No hay productos en esta categoría</h3>
+                        <p>Visita el panel de administración para agregar productos.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = productosCategoria.map(product => `
+                <div class="product-card" data-id="${product.id}">
+                    <div class="product-img" style="background-image: url('${product.image}')"></div>
+                    <div class="product-content">
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
+                        ${product.description ? `<p style="color: #666; font-size: 14px; margin-bottom: 15px;">${product.description}</p>` : ''}
+                        <button class="add-to-cart">Añadir al Carrito</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Añadir event listeners a los botones de carrito
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productCard = this.closest('.product-card');
+                    const productId = parseInt(productCard.dataset.id);
+                    const product = productosCategoria.find(p => p.id === productId);
+                    
+                    if (product && window.shoppingCart) {
+                        window.shoppingCart.addProduct(product);
+                    }
+                });
+            });
+        }
+        
+        // ============================================
+        // SISTEMA DE CARRITO DE COMPRAS
+        // ============================================
+        
+        class ShoppingCart {
+            constructor() {
+                this.cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
+                this.updateCartCount();
+                this.setupEventListeners();
+            }
+            
+            updateCartCount() {
+                const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+                const cartCountElement = document.getElementById('cartCount');
+                if (cartCountElement) {
+                    cartCountElement.textContent = totalItems;
+                }
+            }
+            
+            setupEventListeners() {
+                const openCartBtn = document.getElementById('openCart');
+                if (openCartBtn) {
+                    openCartBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        // Redirigir al index.html para ver el carrito completo
+                        window.location.href = 'index.html';
+                    });
+                }
+            }
+            
+            addProduct(product) {
+                const cartProduct = {
+                    id: product.id,
+                    name: product.name,
+                    price: parseFloat(product.price),
+                    image: product.image,
+                    quantity: 1
+                };
+                
+                const existingProductIndex = this.cart.findIndex(item => item.id === product.id);
+                
+                if (existingProductIndex !== -1) {
+                    this.cart[existingProductIndex].quantity += 1;
+                } else {
+                    this.cart.push(cartProduct);
+                }
+                
+                localStorage.setItem('modaEleganteCart', JSON.stringify(this.cart));
+                this.updateCartCount();
+                this.showAddedMessage(product.name);
+            }
+            
+            showAddedMessage(productName) {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: #27ae60;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    display: flex;
+                    align-items: center;
+                `;
+                message.innerHTML = `
+                    <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 20px;"></i>
+                    <div>
+                        <strong>¡Producto añadido!</strong><br>
+                        ${productName}
+                    </div>
+                `;
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    message.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        message.remove();
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar carrito
+            window.shoppingCart = new ShoppingCart();
+            
+            // Cargar productos
+            cargarProductos();
+            
+            // Menú responsive
+            const menuToggle = document.getElementById('menuToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                });
+                
+                document.querySelectorAll('nav a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
+            
+            // Actualizar productos cada 30 segundos
+            setInterval(() => {
+                cargarProductos();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
