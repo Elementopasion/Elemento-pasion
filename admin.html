@@ -670,15 +670,15 @@ function displayProducts(products) {
         return;
     }
     
-    // URL de placeholder que SÍ existe
- const PLACEHOLDER_URL = 'https://via.placeholder.com/80.png/cccccc/666666?text=No+img';
+    const PLACEHOLDER_URL = 'https://via.placeholder.com/80.png/cccccc/666666?text=No+img';
     
     container.innerHTML = products.map((product, index) => {
-        // Manejo SEGURO de la imagen
+        // Asegurarse de que el ID existe y es string
+        const productId = product.id ? product.id.toString() : Date.now().toString();
+        
         let imageUrl = product.image || '';
         let hasValidImage = false;
         
-        // Verificar si es una URL válida
         if (imageUrl && 
             typeof imageUrl === 'string' && 
             imageUrl.trim() !== '' && 
@@ -687,7 +687,7 @@ function displayProducts(products) {
         }
         
         return `
-            <div class="product-item" data-id="${product.id}" data-index="${index}">
+            <div class="product-item" data-id="${productId}" data-index="${index}">
                 <img src="${hasValidImage ? imageUrl : PLACEHOLDER_URL}" 
                      class="product-image" 
                      alt="${product.name}"
@@ -705,7 +705,7 @@ function displayProducts(products) {
                     <button class="btn-secondary" onclick="editProduct(${index})">
                         <i class="fas fa-edit"></i> Editar
                     </button>
-                    <button class="btn-danger" onclick="deleteProductNow('${product.id}', ${index})">
+                    <button class="btn-danger" onclick="deleteProductNow('${productId}', ${index})">
                         <i class="fas fa-trash"></i> Eliminar
                     </button>
                 </div>
@@ -1016,28 +1016,28 @@ async function deleteProductNow(productId, index) {
         if (USE_GOOGLE_SHEETS) {
             console.log(`📡 Enviando a Google Sheets: ${productId}`);
             
-            // Método 1: Simplemente hacer la petición y no esperar mucho
-            const deleteUrl = `${GOOGLE_SHEETS_API}?action=deleteProduct&id=${encodeURIComponent(productId)}`;
+            // CORRECCIÓN: Usar POST correctamente
+            const params = new URLSearchParams();
+            params.append('action', 'deleteProduct');
+            params.append('id', productId.toString());
             
-            // Hacer la petición pero con timeout corto
-            const deletePromise = fetch(deleteUrl).catch(e => {
-                console.log('Error en fetch (no crítico):', e);
-                return {ok: false};
+            const response = await fetch(GOOGLE_SHEETS_API, {
+                method: 'POST',
+                body: params
             });
             
-            // Timeout de 3 segundos máximo
-            const timeoutPromise = new Promise(resolve => {
-                setTimeout(() => resolve({ok: false, timeout: true}), 3000);
-            });
-            
-            const result = await Promise.race([deletePromise, timeoutPromise]);
+            const result = await response.json();
             console.log('Resultado eliminación:', result);
+            
+            if (result.error) {
+                throw new Error(result.error);
+            }
         }
         
         // 3. Eliminar de localStorage SIEMPRE
         const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
         const updatedProducts = products.filter(p => {
-            // Comparar como string y número
+            // Comparar como strings
             const pId = p.id ? p.id.toString() : '';
             const targetId = productId ? productId.toString() : '';
             return pId !== targetId;
@@ -1088,7 +1088,7 @@ async function deleteProductNow(productId, index) {
         // Actualizar allProducts localmente
         allProducts = allProducts.filter((p, i) => i !== index);
         
-        alert('⚠️ Producto eliminado localmente. Puede que siga en Google Sheets.');
+        alert('⚠️ Producto eliminado localmente. Puede que siga en Google Sheets. Error: ' + error.message);
     }
 }
         
