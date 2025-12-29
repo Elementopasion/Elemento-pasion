@@ -365,7 +365,7 @@
             <div class="login-section" id="loginSection">
                 <h2>Acceso Restringido</h2>
                 <p>Ingresa la contraseña de administrador para continuar:</p>
-                <input type="password" id="adminPassword" class="login-input" placeholder="Contraseña de administrador" value="admin123">
+                <input type="password" id="adminPassword" class="login-input" placeholder="Contraseña de administrador">
                 <button class="login-btn" onclick="checkPassword()">
                     <i class="fas fa-sign-in-alt"></i> Ingresar al Panel
                 </button>
@@ -499,7 +499,12 @@
         // ============================================
         
         const ADMIN_PASSWORD = "admin123";
+        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx174S9QlKMHYkSJGaTioLCKLM8HZZvE8AZ_jHrQll_VVjSskod7mw0EfbDxM4snV-25g/exec";
+        const USE_GOOGLE_SHEETS = true; // Cambia a false si quieres solo localStorage
+        
         let allProducts = [];
+        let isEditing = false;
+        let editingProductId = null;
         
         // ============================================
         // FUNCIONES DEL SISTEMA
@@ -514,6 +519,8 @@
                 loadProducts();
             } else {
                 alert('Contraseña incorrecta');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
             }
         }
         
@@ -534,7 +541,7 @@
         // FUNCIONES DE PRODUCTOS
         // ============================================
         
-        function loadProducts() {
+        async function loadProducts() {
             const container = document.getElementById('productsList');
             container.innerHTML = `
                 <div style="text-align: center; padding: 20px;">
@@ -544,23 +551,50 @@
             `;
             
             try {
-                // Cargar productos desde localStorage
-                allProducts = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                if (USE_GOOGLE_SHEETS) {
+                    // Cargar desde Google Sheets
+                    const response = await fetch(`${GOOGLE_SHEETS_API}?action=getProducts`);
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    allProducts = Array.isArray(data) ? data : [];
+                    
+                } else {
+                    // Cargar desde localStorage
+                    allProducts = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                }
                 
                 displayProducts(allProducts);
                 
             } catch (error) {
                 console.error('Error cargando productos:', error);
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #e74c3c;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
-                        <p>Error cargando productos</p>
-                        <p style="font-size: 14px; margin-top: 10px;">${error.message}</p>
-                        <button class="btn-secondary" onclick="loadProducts()" style="margin-top: 20px;">
-                            <i class="fas fa-redo"></i> Reintentar
-                        </button>
-                    </div>
-                `;
+                
+                // Fallback a localStorage
+                if (USE_GOOGLE_SHEETS) {
+                    allProducts = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                    displayProducts(allProducts);
+                    
+                    container.innerHTML += `
+                        <div style="text-align: center; padding: 20px; color: #e74c3c;">
+                            <p><i class="fas fa-exclamation-triangle"></i> Usando datos locales (fallback)</p>
+                            <p style="font-size: 12px;">${error.message}</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #e74c3c;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                            <p>Error cargando productos</p>
+                            <p style="font-size: 14px; margin-top: 10px;">${error.message}</p>
+                            <button class="btn-secondary" onclick="loadProducts()" style="margin-top: 20px;">
+                                <i class="fas fa-redo"></i> Reintentar
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
         
@@ -589,7 +623,7 @@
                         <div class="product-meta">
                             Categoría: ${getCategoryName(product.category)} | 
                             Precio: $${parseFloat(product.price).toFixed(2)} | 
-                            ${product.featured === true ? '⭐ Destacado' : 'Normal'}
+                            ${product.featured === true || product.featured === 'true' ? '⭐ Destacado' : 'Normal'}
                         </div>
                         ${product.description ? `<div style="font-size: 13px; color: #888; margin-top: 5px;">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
                     </div>
@@ -597,7 +631,7 @@
                         <button class="btn-secondary" onclick="editProduct(${index})">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn-danger" onclick="deleteProduct(${index})">
+                        <button class="btn-danger" onclick="deleteProduct('${product.id}', ${index})">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </div>
@@ -677,12 +711,68 @@
             status.innerHTML = '<span style="color: #3498db;">Guardando producto...</span>';
             
             try {
-                // Obtener productos existentes
+                const productData = {
+                    name: name,
+                    price: price,
+                    category: category,
+                    image: image,
+                    description: description,
+                    featured: featured
+                };
+                
+                let savedId = null;
+                
+                if (USE_GOOGLE_SHEETS && !isEditing) {
+                    // Guardar en Google Sheets
+                    const params = new URLSearchParams({
+                        action: 'addProduct',
+                        ...productData
+                    });
+                    
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: params
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    
+                    savedId = result.id;
+                    status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado en Google Sheets!</span>';
+                    
+                } else if (isEditing && editingProductId) {
+                    // Actualizar en Google Sheets
+                    productData.id = editingProductId;
+                    const params = new URLSearchParams({
+                        action: 'updateProduct',
+                        ...productData
+                    });
+                    
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: params
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    
+                    savedId = editingProductId;
+                    status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto actualizado en Google Sheets!</span>';
+                    isEditing = false;
+                    editingProductId = null;
+                }
+                
+                // También guardar en localStorage para consistencia
                 const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
                 
-                // Crear nuevo producto
                 const newProduct = {
-                    id: Date.now(),
+                    id: savedId || Date.now().toString(),
                     name: name,
                     price: parseFloat(price),
                     category: category,
@@ -692,23 +782,27 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                // Agregar a la lista
-                products.push(newProduct);
+                if (isEditing) {
+                    // Actualizar en localStorage
+                    const index = products.findIndex(p => p.id === editingProductId);
+                    if (index !== -1) {
+                        products[index] = newProduct;
+                    }
+                    isEditing = false;
+                    editingProductId = null;
+                } else {
+                    // Agregar nuevo en localStorage
+                    products.push(newProduct);
+                }
                 
-                // Guardar en localStorage
                 localStorage.setItem('modaEleganteProducts', JSON.stringify(products));
                 
-                status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado exitosamente!</span>';
+                if (!USE_GOOGLE_SHEETS) {
+                    status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado en localStorage!</span>';
+                }
                 
                 // Limpiar formulario
-                document.getElementById('productName').value = '';
-                document.getElementById('productPrice').value = '';
-                document.getElementById('productCategory').value = '';
-                document.getElementById('productDescription').value = '';
-                document.getElementById('productImage').value = '';
-                document.getElementById('productImageUrl').value = '';
-                document.getElementById('imagePreview').style.display = 'none';
-                document.getElementById('imageStatus').textContent = '';
+                resetForm();
                 
                 // Recargar lista
                 setTimeout(() => {
@@ -718,6 +812,41 @@
             } catch (error) {
                 console.error('Error:', error);
                 status.innerHTML = `<span style="color: #e74c3c;"><i class="fas fa-times"></i> Error: ${error.message}</span>`;
+                
+                // Fallback: guardar solo en localStorage
+                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                
+                const newProduct = {
+                    id: Date.now().toString(),
+                    name: name,
+                    price: parseFloat(price),
+                    category: category,
+                    description: description,
+                    featured: featured,
+                    image: image,
+                    createdAt: new Date().toISOString()
+                };
+                
+                if (isEditing) {
+                    const index = products.findIndex(p => p.id === editingProductId);
+                    if (index !== -1) {
+                        products[index] = newProduct;
+                    }
+                    isEditing = false;
+                    editingProductId = null;
+                } else {
+                    products.push(newProduct);
+                }
+                
+                localStorage.setItem('modaEleganteProducts', JSON.stringify(products));
+                
+                status.innerHTML += '<br><span style="color: #3498db;">Producto guardado en localStorage como respaldo.</span>';
+                resetForm();
+                
+                setTimeout(() => {
+                    loadProducts();
+                }, 1000);
+                
             } finally {
                 btn.innerHTML = '<i class="fas fa-save"></i> Guardar Producto';
                 btn.disabled = false;
@@ -727,6 +856,22 @@
                     status.innerHTML = '';
                 }, 5000);
             }
+        }
+        
+        function resetForm() {
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productCategory').value = '';
+            document.getElementById('productDescription').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('productImageUrl').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageStatus').textContent = '';
+            document.querySelector('input[name="featured"][value="true"]').checked = true;
+            
+            const btn = document.getElementById('addProductBtn');
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Producto';
+            btn.onclick = addNewProduct;
         }
         
         function convertImageToBase64(file) {
@@ -746,12 +891,13 @@
             const product = allProducts[index];
             
             if (product) {
+                // Llenar formulario con datos del producto
                 document.getElementById('productName').value = product.name;
                 document.getElementById('productPrice').value = product.price;
                 document.getElementById('productCategory').value = product.category;
                 document.getElementById('productDescription').value = product.description || '';
                 document.getElementById('productImageUrl').value = product.image.startsWith('http') ? product.image : '';
-                document.querySelector(`input[name="featured"][value="${product.featured}"]`).checked = true;
+                document.querySelector(`input[name="featured"][value="${product.featured === true || product.featured === 'true'}"]`).checked = true;
                 
                 // Mostrar imagen actual
                 const preview = document.getElementById('imagePreview');
@@ -761,29 +907,69 @@
                     document.getElementById('imageStatus').textContent = 'Imagen actual del producto';
                 }
                 
+                // Cambiar botón a "Actualizar"
+                const btn = document.getElementById('addProductBtn');
+                btn.innerHTML = '<i class="fas fa-sync"></i> Actualizar Producto';
+                btn.onclick = addNewProduct;
+                
+                // Configurar edición
+                isEditing = true;
+                editingProductId = product.id;
+                
                 openTab('addProduct');
                 
-                // Eliminar producto antiguo
-                allProducts.splice(index, 1);
-                localStorage.setItem('modaEleganteProducts', JSON.stringify(allProducts));
-                
-                alert('Producto cargado para edición. Modifica y haz clic en "Guardar Producto".');
+                alert('Producto cargado para edición. Modifica y haz clic en "Actualizar Producto".');
             }
         }
         
-        function deleteProduct(index) {
+        async function deleteProduct(productId, index) {
             if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
                 return;
             }
             
-            allProducts.splice(index, 1);
-            localStorage.setItem('modaEleganteProducts', JSON.stringify(allProducts));
-            
-            alert('Producto eliminado');
-            loadProducts();
+            try {
+                if (USE_GOOGLE_SHEETS) {
+                    // Eliminar de Google Sheets
+                    const params = new URLSearchParams({
+                        action: 'deleteProduct',
+                        id: productId
+                    });
+                    
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: params
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                }
+                
+                // Eliminar de localStorage
+                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                const updatedProducts = products.filter(p => p.id !== productId);
+                localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+                
+                alert('Producto eliminado');
+                loadProducts();
+                
+            } catch (error) {
+                console.error('Error eliminando producto:', error);
+                alert('Error al eliminar producto: ' + error.message);
+                
+                // Fallback: eliminar solo de localStorage
+                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                const updatedProducts = products.filter(p => p.id !== productId);
+                localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+                
+                alert('Producto eliminado de localStorage (fallback)');
+                loadProducts();
+            }
         }
         
-        function deleteAllProducts() {
+        async function deleteAllProducts() {
             if (!confirm('⚠️ ¿ELIMINAR TODOS LOS PRODUCTOS?\n\nEsta acción no se puede deshacer.')) {
                 return;
             }
@@ -792,11 +978,40 @@
                 return;
             }
             
-            localStorage.removeItem('modaEleganteProducts');
-            allProducts = [];
-            
-            alert('Todos los productos han sido eliminados');
-            loadProducts();
+            try {
+                if (USE_GOOGLE_SHEETS) {
+                    // Eliminar todos de Google Sheets
+                    const params = new URLSearchParams({
+                        action: 'deleteAll'
+                    });
+                    
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: params
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                }
+                
+                // Eliminar todos de localStorage
+                localStorage.removeItem('modaEleganteProducts');
+                allProducts = [];
+                
+                alert('Todos los productos han sido eliminados');
+                loadProducts();
+                
+            } catch (error) {
+                console.error('Error eliminando productos:', error);
+                alert('Error: ' + error.message + '\nEliminando solo de localStorage...');
+                
+                localStorage.removeItem('modaEleganteProducts');
+                allProducts = [];
+                loadProducts();
+            }
         }
         
         function exportProducts() {
@@ -856,13 +1071,16 @@
         // ============================================
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Limpiar campo de contraseña al cargar
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminPassword').focus();
+            
+            // Enter para login
             document.getElementById('adminPassword').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     checkPassword();
                 }
             });
-            
-            document.getElementById('adminPassword').focus();
         });
     </script>
 </body>
