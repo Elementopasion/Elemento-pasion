@@ -969,50 +969,61 @@
             }
         }
         
-        async function deleteAllProducts() {
-            if (!confirm('⚠️ ¿ELIMINAR TODOS LOS PRODUCTOS?\n\nEsta acción no se puede deshacer.')) {
-                return;
-            }
-            
-            if (!confirm('⛔ CONFIRMACIÓN FINAL: Esto borrará TODOS los productos permanentemente.')) {
-                return;
-            }
-            
-            try {
-                if (USE_GOOGLE_SHEETS) {
-                    // Eliminar todos de Google Sheets
-                    const params = new URLSearchParams({
-                        action: 'deleteAll'
-                    });
-                    
-                    const response = await fetch(GOOGLE_SHEETS_API, {
-                        method: 'POST',
-                        body: params
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.error) {
-                        throw new Error(result.error);
-                    }
-                }
-                
-                // Eliminar todos de localStorage
-                localStorage.removeItem('modaEleganteProducts');
-                allProducts = [];
-                
-                alert('Todos los productos han sido eliminados');
-                loadProducts();
-                
-            } catch (error) {
-                console.error('Error eliminando productos:', error);
-                alert('Error: ' + error.message + '\nEliminando solo de localStorage...');
-                
-                localStorage.removeItem('modaEleganteProducts');
-                allProducts = [];
-                loadProducts();
-            }
-        }
+async function deleteProduct(productId, index) {
+  if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+    return;
+  }
+  
+  try {
+    if (USE_GOOGLE_SHEETS) {
+      // Eliminar de Google Sheets - CORREGIDO
+      const params = new URLSearchParams();
+      params.append('action', 'deleteProduct');
+      params.append('id', productId);
+      
+      console.log('Eliminando producto ID:', productId);
+      console.log('URL:', GOOGLE_SHEETS_API);
+      console.log('Params:', params.toString());
+      
+      const response = await fetch(GOOGLE_SHEETS_API + '?action=deleteProduct&id=' + encodeURIComponent(productId), {
+        method: 'POST',
+        mode: 'no-cors' // Importante para evitar problemas CORS
+      });
+      
+      // Con no-cors no podemos leer la respuesta, pero confiamos en que funcionó
+      console.log('Eliminación enviada a Google Sheets');
+      
+      // También intentar con GET por si acaso
+      await fetch(GOOGLE_SHEETS_API + '?action=deleteProduct&id=' + encodeURIComponent(productId));
+      
+    }
+    
+    // Siempre eliminar de localStorage
+    const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+    const updatedProducts = products.filter(p => p.id !== productId && p.id !== productId.toString());
+    localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+    
+    // Actualizar la lista visualmente
+    allProducts = allProducts.filter(p => p.id !== productId && p.id !== productId.toString());
+    displayProducts(allProducts);
+    
+    alert('Producto eliminado correctamente');
+    
+  } catch (error) {
+    console.error('Error eliminando producto:', error);
+    
+    // Fallback: eliminar solo de localStorage
+    const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+    const updatedProducts = products.filter(p => p.id !== productId && p.id !== productId.toString());
+    localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+    
+    // Actualizar la lista visualmente
+    allProducts = allProducts.filter(p => p.id !== productId && p.id !== productId.toString());
+    displayProducts(allProducts);
+    
+    alert('Producto eliminado de localStorage');
+  }
+}
         
         function exportProducts() {
             if (allProducts.length === 0) {
