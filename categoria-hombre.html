@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ropa de Hombre - Elemento Pasión</title>
+    <title>Ropa de Hombre - Moda Elegante</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ========== ESTILOS GENERALES ========== */
@@ -78,6 +78,7 @@
         .cart-icon {
             position: relative;
             font-size: 20px;
+            cursor: pointer;
         }
         
         .cart-count {
@@ -187,6 +188,26 @@
             margin: 30px 0;
         }
         
+        /* ========== NOTIFICACIÓN FLOTANTE ========== */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+        }
+        
+        .notification.slide-out {
+            animation: slideOut 0.3s ease;
+        }
+        
         /* ========== LOADING SPINNER ========== */
         .loading-products {
             text-align: center;
@@ -267,7 +288,7 @@
 <body>
     <header>
         <div class="container header-container">
-            <a href="index.html" class="logo">Elemento<span>Pasión</span></a>
+            <a href="index.html" class="logo">Moda<span>Elegante</span></a>
             
             <div class="menu-toggle" id="menuToggle">
                 <i class="fas fa-bars"></i>
@@ -319,9 +340,8 @@
         // CONFIGURACIÓN
         // ============================================
         
-        // Usar localStorage para productos (más simple)
-        // Cambia a Google Sheets cuando tengas la API configurada
         const USE_GOOGLE_SHEETS = true;
+        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx174S9QlKMHYkSJGaTioLCKLM8HZZvE8AZ_jHrQll_VVjSskod7mw0EfbDxM4snV-25g/exec";
         
         // ============================================
         // SISTEMA DE PRODUCTOS
@@ -334,11 +354,14 @@
             
             try {
                 if (USE_GOOGLE_SHEETS) {
-                    // Código para Google Sheets
-                    
-                    const API_URL = 'https://script.google.com/macros/s/AKfycbx0yL1U9ONcWKNDCyZ7R9WHAKGi-qhcX-dpmtOWG7U29HDjMH0v5VMBPgKxAYUNfDsOSQ/exec';
-                    const response = await fetch(`${API_URL}?action=getProducts`);
+                    // Cargar desde Google Sheets
+                    const response = await fetch(`${GOOGLE_SHEETS_API}?action=getProducts`);
                     const todosProductos = await response.json();
+                    
+                    if (todosProductos.error) {
+                        throw new Error(todosProductos.error);
+                    }
+                    
                     productosHombre = todosProductos.filter(p => p.category === 'hombre');
                     
                 } else {
@@ -419,29 +442,18 @@
             }
             
             container.innerHTML = productosHombre.map(product => `
-                <div class="product-card" data-id="${product.id}">
+                <div class="product-card">
                     <div class="product-img" style="background-image: url('${product.image}')"></div>
                     <div class="product-content">
                         <h3 class="product-title">${product.name}</h3>
                         <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
                         ${product.description ? `<p style="color: #666; font-size: 14px; margin-bottom: 15px;">${product.description}</p>` : ''}
-                        <button class="add-to-cart">Añadir al Carrito</button>
+                        <button class="add-to-cart" onclick="addToCart(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                            Añadir al Carrito
+                        </button>
                     </div>
                 </div>
             `).join('');
-            
-            // Añadir event listeners a los botones de carrito
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productCard = this.closest('.product-card');
-                    const productId = parseInt(productCard.dataset.id);
-                    const product = productosHombre.find(p => p.id === productId);
-                    
-                    if (product && window.shoppingCart) {
-                        window.shoppingCart.addProduct(product);
-                    }
-                });
-            });
         }
         
         // ============================================
@@ -475,6 +487,16 @@
             }
             
             addProduct(product) {
+                // Convertir el producto si viene como string
+                if (typeof product === 'string') {
+                    try {
+                        product = JSON.parse(product.replace(/&quot;/g, '"'));
+                    } catch (e) {
+                        console.error('Error parsing product:', e);
+                        return;
+                    }
+                }
+                
                 const cartProduct = {
                     id: product.id,
                     name: product.name,
@@ -493,40 +515,47 @@
                 
                 localStorage.setItem('modaEleganteCart', JSON.stringify(this.cart));
                 this.updateCartCount();
-                this.showAddedMessage(product.name);
+                this.showNotification(product.name);
             }
             
-            showAddedMessage(productName) {
-                const message = document.createElement('div');
-                message.style.cssText = `
-                    position: fixed;
-                    top: 100px;
-                    right: 20px;
-                    background: #27ae60;
-                    color: white;
-                    padding: 15px 20px;
-                    border-radius: 5px;
-                    z-index: 10000;
-                    animation: slideIn 0.3s ease;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    display: flex;
-                    align-items: center;
-                `;
-                message.innerHTML = `
+            showNotification(productName) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.innerHTML = `
                     <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 20px;"></i>
                     <div>
                         <strong>¡Producto añadido!</strong><br>
                         ${productName}
                     </div>
                 `;
-                document.body.appendChild(message);
+                document.body.appendChild(notification);
                 
                 setTimeout(() => {
-                    message.style.animation = 'slideOut 0.3s ease';
+                    notification.classList.add('slide-out');
                     setTimeout(() => {
-                        message.remove();
+                        notification.remove();
                     }, 300);
                 }, 3000);
+            }
+        }
+        
+        // Función para añadir al carrito (global)
+        function addToCart(product) {
+            if (typeof product === 'string') {
+                try {
+                    product = JSON.parse(product.replace(/&quot;/g, '"'));
+                } catch (e) {
+                    console.error('Error parsing product:', e);
+                    return;
+                }
+            }
+            
+            if (window.shoppingCart) {
+                window.shoppingCart.addProduct(product);
+            } else {
+                // Si no existe, crear uno nuevo
+                window.shoppingCart = new ShoppingCart();
+                window.shoppingCart.addProduct(product);
             }
         }
         
