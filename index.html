@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elemento Pasión - Tienda de Ropa Online</title>
+    <title>Moda Elegante - Tienda de Ropa Online</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ========== ESTILOS GENERALES ========== */
@@ -78,6 +78,7 @@
         .cart-icon {
             position: relative;
             font-size: 20px;
+            cursor: pointer;
         }
         
         .cart-count {
@@ -395,6 +396,11 @@
             background: #219653;
         }
         
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+        }
+        
         /* ========== MODAL DE PAGO ========== */
         .checkout-modal {
             display: none;
@@ -434,7 +440,7 @@
             font-size: 18px;
         }
         
-        .checkout-form input {
+        .checkout-form input, .checkout-form textarea {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
@@ -443,7 +449,7 @@
             font-size: 16px;
         }
         
-        .checkout-form input:focus {
+        .checkout-form input:focus, .checkout-form textarea:focus {
             outline: none;
             border-color: #3498db;
         }
@@ -622,13 +628,33 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
+        
+        /* ========== NOTIFICACIÓN FLOTANTE ========== */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+        }
+        
+        .notification.slide-out {
+            animation: slideOut 0.3s ease;
+        }
     </style>
 </head>
 <body>
     <!-- Header y navegación -->
     <header>
         <div class="container header-container">
-            <a href="index.html" class="logo">Elemento<span>Pasión</span></a>
+            <a href="index.html" class="logo">Moda<span>Elegante</span></a>
             
             <div class="menu-toggle" id="menuToggle">
                 <i class="fas fa-bars"></i>
@@ -736,7 +762,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-column">
-                    <h3>Elemento Pasión</h3>
+                    <h3>Moda Elegante</h3>
                     <p>Tu tienda de ropa online con las últimas tendencias en moda para toda la familia. Calidad, estilo y comodidad en un solo lugar.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -779,7 +805,7 @@
             </div>
             
             <div class="copyright">
-                <p>&copy; 2023 Elemento Pasión. Todos los derechos reservados.</p>
+                <p>&copy; 2023 Moda Elegante. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -793,6 +819,7 @@
         
         <div class="cart-items" id="cartItems">
             <div class="empty-cart" id="emptyCart" style="text-align: center; padding: 40px;">
+                <i class="fas fa-shopping-cart" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
                 <p>Tu carrito está vacío</p>
                 <p style="margin-top: 10px; color: #666;">Añade algunos productos para empezar</p>
             </div>
@@ -909,9 +936,8 @@
         // CONFIGURACIÓN DE LA API
         // ============================================
         
-        // ¡IMPORTANTE! Cambia esta URL por la de TU Google Apps Script
-        // O usa localStorage si no tienes Google Sheets configurado
-        const USE_GOOGLE_SHEETS = true; // Cambia a true cuando tengas la API
+        const USE_GOOGLE_SHEETS = true;
+        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx174S9QlKMHYkSJGaTioLCKLM8HZZvE8AZ_jHrQll_VVjSskod7mw0EfbDxM4snV-25g/exec";
         
         // ============================================
         // SISTEMA DE PRODUCTOS
@@ -931,27 +957,28 @@
             
             async loadProducts() {
                 try {
-                    // Si no tenemos Google Sheets configurado, usar localStorage
-                    if (!USE_GOOGLE_SHEETS) {
+                    if (USE_GOOGLE_SHEETS) {
+                        // Cargar desde Google Sheets
+                        const response = await fetch(`${GOOGLE_SHEETS_API}?action=getProducts`);
+                        const products = await response.json();
+                        
+                        if (products.error) {
+                            throw new Error(products.error);
+                        }
+                        
+                        this.products = products.map(product => ({
+                            ...product,
+                            id: Number(product.id) || product.id,
+                            price: Number(product.price) || 0,
+                            featured: product.featured === 'true' || product.featured === true
+                        }));
+                        
+                        localStorage.setItem('modaEleganteProducts', JSON.stringify(this.products));
+                        
+                    } else {
+                        // Cargar desde localStorage
                         this.products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || this.getDefaultProducts();
-                        return;
                     }
-                    
-                    // Código para Google Sheets (comentado por ahora)
-                    
-                    const API_URL = 'https://script.google.com/macros/s/AKfycbx0yL1U9ONcWKNDCyZ7R9WHAKGi-qhcX-dpmtOWG7U29HDjMH0v5VMBPgKxAYUNfDsOSQ/exec';
-                    const response = await fetch(`${API_URL}?action=getProducts`);
-                    const products = await response.json();
-                    
-                    this.products = products.map(product => ({
-                        ...product,
-                        id: Number(product.id),
-                        price: Number(product.price),
-                        featured: product.featured === 'true' || product.featured === true
-                    }));
-                    
-                    localStorage.setItem('modaEleganteProducts', JSON.stringify(this.products));
-                    
                     
                 } catch (error) {
                     console.error('Error cargando productos:', error);
@@ -1004,6 +1031,7 @@
                 const container = document.getElementById('featuredProducts');
                 if (!container) return;
                 
+                // Filtrar productos destacados
                 const featured = this.products.filter(p => p.featured).slice(0, 6);
                 
                 if (featured.length === 0) {
@@ -1029,29 +1057,16 @@
                                 <i class="fas fa-star-half-alt"></i>
                             </div>
                             <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
-                            <button class="add-to-cart">Añadir al Carrito</button>
+                            <button class="add-to-cart" onclick="window.shoppingCart.addProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                Añadir al Carrito
+                            </button>
                         </div>
                     </div>
                 `).join('');
             }
             
-            getProductsByCategory(category) {
-                return this.products.filter(product => product.category === category);
-            }
-            
             setupCartButtons() {
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('add-to-cart') || 
-                        e.target.closest('.add-to-cart')) {
-                        const productCard = e.target.closest('.product-card');
-                        const productId = parseInt(productCard.dataset.id);
-                        const product = this.products.find(p => p.id === productId);
-                        
-                        if (product && window.shoppingCart) {
-                            window.shoppingCart.addProduct(product);
-                        }
-                    }
-                });
+                // Los botones ya tienen el onclick directamente
             }
         }
 
@@ -1062,13 +1077,14 @@
         class ShoppingCart {
             constructor() {
                 this.cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
-                this.whatsappNumber = "5491112345678"; // <-- ¡CAMBIA ESTE NÚMERO!
+                this.whatsappNumber = "5491112345678"; // ¡CAMBIA ESTE NÚMERO!
                 this.init();
             }
             
             init() {
                 this.updateCartCount();
                 this.setupEventListeners();
+                this.renderCart(); // Renderizar carrito al inicio
             }
             
             setupEventListeners() {
@@ -1128,32 +1144,29 @@
                         this.closeInstructions();
                     });
                 }
-                
-                // Cerrar modales al hacer clic fuera
-                document.addEventListener('click', (e) => {
-                    if (e.target.id === 'cartModal') {
-                        this.closeCart();
-                    }
-                    if (e.target.id === 'checkoutModal') {
-                        this.closeCheckout();
-                    }
-                    if (e.target.id === 'instructionsModal') {
-                        this.closeInstructions();
-                    }
-                });
             }
             
             addProduct(product) {
+                // Convertir el producto si viene como string
+                if (typeof product === 'string') {
+                    try {
+                        product = JSON.parse(product.replace(/&quot;/g, '"'));
+                    } catch (e) {
+                        console.error('Error parsing product:', e);
+                        return;
+                    }
+                }
+                
                 const cartProduct = {
                     id: product.id,
                     name: product.name,
-                    price: product.price,
+                    price: parseFloat(product.price),
                     image: product.image,
                     quantity: 1
                 };
                 
                 // Verificar si el producto ya está en el carrito
-                const existingProductIndex = this.cart.findIndex(item => item.id === product.id);
+                const existingProductIndex = this.cart.findIndex(item => item.id == cartProduct.id);
                 
                 if (existingProductIndex !== -1) {
                     this.cart[existingProductIndex].quantity += 1;
@@ -1163,7 +1176,7 @@
                 
                 this.saveCart();
                 this.updateCartCount();
-                this.showAddedMessage(product.name);
+                this.showNotification(product.name);
                 
                 // Si el carrito está abierto, actualizarlo
                 if (document.getElementById('cartModal').classList.contains('active')) {
@@ -1171,36 +1184,23 @@
                 }
             }
             
-            showAddedMessage(productName) {
+            showNotification(productName) {
                 // Crear mensaje flotante
-                const message = document.createElement('div');
-                message.style.cssText = `
-                    position: fixed;
-                    top: 100px;
-                    right: 20px;
-                    background: #27ae60;
-                    color: white;
-                    padding: 15px 20px;
-                    border-radius: 5px;
-                    z-index: 10000;
-                    animation: slideIn 0.3s ease;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    display: flex;
-                    align-items: center;
-                `;
-                message.innerHTML = `
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.innerHTML = `
                     <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 20px;"></i>
                     <div>
                         <strong>¡Producto añadido!</strong><br>
                         ${productName}
                     </div>
                 `;
-                document.body.appendChild(message);
+                document.body.appendChild(notification);
                 
                 setTimeout(() => {
-                    message.style.animation = 'slideOut 0.3s ease';
+                    notification.classList.add('slide-out');
                     setTimeout(() => {
-                        message.remove();
+                        notification.remove();
                     }, 300);
                 }, 3000);
             }
@@ -1263,12 +1263,13 @@
                             <div class="cart-item-title">${item.name}</div>
                             <div class="cart-item-price">$${item.price.toFixed(2)}</div>
                             <div class="cart-item-quantity">
-                                <button class="quantity-btn minus" data-index="${index}">-</button>
-                                <input type="number" class="quantity-input" value="${item.quantity}" min="1" data-index="${index}">
-                                <button class="quantity-btn plus" data-index="${index}">+</button>
+                                <button class="quantity-btn minus" onclick="window.shoppingCart.updateQuantity(${index}, -1)">-</button>
+                                <input type="number" class="quantity-input" value="${item.quantity}" min="1" 
+                                       onchange="window.shoppingCart.updateQuantityInput(${index}, this.value)">
+                                <button class="quantity-btn plus" onclick="window.shoppingCart.updateQuantity(${index}, 1)">+</button>
                             </div>
                         </div>
-                        <button class="remove-item" data-index="${index}" title="Eliminar producto">&times;</button>
+                        <button class="remove-item" onclick="window.shoppingCart.removeItem(${index})" title="Eliminar producto">&times;</button>
                     `;
                     
                     cartItemsContainer.appendChild(itemElement);
@@ -1282,58 +1283,44 @@
                 document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
                 document.getElementById('shipping').textContent = `$${shipping.toFixed(2)}`;
                 document.getElementById('total').textContent = `$${total.toFixed(2)}`;
-                
-                // Event listeners para los controles del carrito
-                this.setupCartControls();
             }
             
-            setupCartControls() {
-                // Botones de cantidad
-                document.querySelectorAll('.quantity-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const index = parseInt(e.target.dataset.index);
-                        if (e.target.classList.contains('plus')) {
-                            this.cart[index].quantity += 1;
-                        } else if (e.target.classList.contains('minus')) {
-                            if (this.cart[index].quantity > 1) {
-                                this.cart[index].quantity -= 1;
-                            } else {
-                                // Si la cantidad es 1 y se hace clic en menos, eliminar producto
-                                this.cart.splice(index, 1);
-                            }
-                        }
-                        this.saveCart();
-                        this.updateCartCount();
-                        this.renderCart();
-                    });
-                });
+            updateQuantity(index, change) {
+                const newQuantity = this.cart[index].quantity + change;
                 
-                // Inputs de cantidad
-                document.querySelectorAll('.quantity-input').forEach(input => {
-                    input.addEventListener('change', (e) => {
-                        const index = parseInt(e.target.dataset.index);
-                        const newQuantity = parseInt(e.target.value);
-                        if (newQuantity >= 1) {
-                            this.cart[index].quantity = newQuantity;
-                            this.saveCart();
-                            this.updateCartCount();
-                            this.renderCart();
-                        } else {
-                            e.target.value = this.cart[index].quantity;
-                        }
-                    });
-                });
+                if (newQuantity >= 1) {
+                    this.cart[index].quantity = newQuantity;
+                } else {
+                    // Si la cantidad es 0 o menor, eliminar producto
+                    this.cart.splice(index, 1);
+                }
                 
-                // Botones eliminar
-                document.querySelectorAll('.remove-item').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const index = parseInt(e.target.dataset.index);
-                        this.cart.splice(index, 1);
-                        this.saveCart();
-                        this.updateCartCount();
-                        this.renderCart();
-                    });
-                });
+                this.saveCart();
+                this.updateCartCount();
+                this.renderCart();
+            }
+            
+            updateQuantityInput(index, value) {
+                const newQuantity = parseInt(value);
+                
+                if (newQuantity >= 1) {
+                    this.cart[index].quantity = newQuantity;
+                    this.saveCart();
+                    this.updateCartCount();
+                    this.renderCart();
+                } else {
+                    // Restaurar valor anterior
+                    this.renderCart();
+                }
+            }
+            
+            removeItem(index) {
+                if (confirm('¿Estás seguro de que quieres eliminar este producto del carrito?')) {
+                    this.cart.splice(index, 1);
+                    this.saveCart();
+                    this.updateCartCount();
+                    this.renderCart();
+                }
             }
             
             openCheckout() {
