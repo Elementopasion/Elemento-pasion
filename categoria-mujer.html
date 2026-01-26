@@ -75,6 +75,11 @@
             color: #e74c3c;
         }
         
+        .active {
+            color: #e74c3c !important;
+            border-bottom: 2px solid #e74c3c;
+        }
+        
         .cart-icon {
             position: relative;
             font-size: 20px;
@@ -221,6 +226,7 @@
             background-color: #f8f9fa;
             transition: transform 0.5s ease;
             position: relative;
+            cursor: pointer;
         }
         
         .product-card:hover .product-img {
@@ -245,7 +251,7 @@
             opacity: 1;
         }
         
-        .quick-view {
+        .quick-view-btn {
             background: white;
             color: #e74c3c;
             border: none;
@@ -254,9 +260,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .quick-view:hover {
+        .quick-view-btn:hover {
             background: #2c3e50;
             color: white;
             transform: scale(1.05);
@@ -334,6 +343,7 @@
             height: 200px;
             border-radius: 12px;
             overflow: hidden;
+            cursor: pointer;
         }
         
         .featured-category img {
@@ -360,6 +370,114 @@
             color: white;
             font-size: 24px;
             font-weight: 700;
+        }
+        
+        /* ========== MODAL DE VISTA RÁPIDA ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .quick-view-modal {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(30px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.active .quick-view-modal {
+            transform: translateY(0);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+        
+        .modal-img {
+            width: 100%;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+        }
+        
+        .modal-details h2 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .modal-price {
+            font-size: 32px;
+            color: #e74c3c;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+        
+        .modal-description {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .modal-features {
+            list-style: none;
+            margin: 20px 0;
+        }
+        
+        .modal-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+        
+        .modal-features li:before {
+            content: "✓";
+            color: #27ae60;
+            margin-right: 10px;
+            font-weight: bold;
         }
         
         /* ========== BOTONES ========== */
@@ -425,6 +543,15 @@
             .featured-categories {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .modal-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .modal-img {
+                height: 300px;
+            }
         }
         
         @media (max-width: 768px) {
@@ -484,6 +611,10 @@
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
                 gap: 25px;
             }
+            
+            .modal-content {
+                padding: 25px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -497,6 +628,10 @@
             
             .product-img {
                 height: 250px;
+            }
+            
+            .quick-view-modal {
+                width: 95%;
             }
         }
     </style>
@@ -519,7 +654,7 @@
                     <li><a href="categoria-ninos.html">Niños</a></li>
                     <li><a href="categoria-calzado.html">Calzado</a></li>
                     <li>
-                        <a href="#" class="cart-icon" id="openCart">
+                        <a href="index.html#cart" class="cart-icon" id="openCart">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="cart-count" id="cartCount">0</span>
                         </a>
@@ -534,7 +669,7 @@
             <h1>Colección Mujer</h1>
             <p>Descubre la elegancia y sofisticación en cada prenda. Moda diseñada para la mujer moderna</p>
             <div style="margin-top: 30px;">
-                <a href="#products" class="back-btn" style="background: white; color: #e74c3c; margin-right: 15px;">
+                <a href="#productsContainer" class="back-btn" style="background: white; color: #e74c3c; margin-right: 15px;">
                     <i class="fas fa-shopping-bag"></i> Ver Colección
                 </a>
             </div>
@@ -544,15 +679,15 @@
     <div class="container">
         <!-- Categorías Destacadas -->
         <div class="featured-categories">
-            <div class="featured-category">
+            <div class="featured-category" onclick="filtrarProductos('vestidos')">
                 <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Vestidos">
                 <div class="featured-category-overlay">Vestidos</div>
             </div>
-            <div class="featured-category">
+            <div class="featured-category" onclick="filtrarProductos('blusas')">
                 <img src="https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Blusas">
                 <div class="featured-category-overlay">Blusas</div>
             </div>
-            <div class="featured-category">
+            <div class="featured-category" onclick="filtrarProductos('faldas')">
                 <img src="https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Faldas">
                 <div class="featured-category-overlay">Faldas</div>
             </div>
@@ -598,6 +733,18 @@
         </div>
     </div>
 
+    <!-- Modal de Vista Rápida -->
+    <div class="modal-overlay" id="quickViewModal">
+        <div class="quick-view-modal">
+            <button class="modal-close" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-content" id="modalContent">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // CONFIGURACIÓN
@@ -640,10 +787,12 @@
                                 category: "mujer",
                                 subcategory: "vestidos",
                                 image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                                description: "Vestido elegante para ocasiones especiales",
+                                description: "Vestido elegante para ocasiones especiales. Confeccionado en tela de alta calidad, perfecto para eventos formales y cenas elegantes.",
+                                features: ["Tela premium", "Ajuste perfecto", "Corte moderno", "Lavable a máquina"],
                                 featured: true,
                                 rating: 4.8,
-                                badge: "Nuevo"
+                                badge: "Nuevo",
+                                stock: 15
                             },
                             {
                                 id: 2,
@@ -653,10 +802,12 @@
                                 category: "mujer",
                                 subcategory: "blusas",
                                 image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                                description: "Blusa de seda natural, cómoda y elegante",
+                                description: "Blusa de seda natural, cómoda y elegante. Ideal para el trabajo o reuniones sociales.",
+                                features: ["Seda 100% natural", "Botones ocultos", "Corte clásico", "Colores disponibles"],
                                 featured: false,
                                 rating: 4.5,
-                                badge: "Oferta"
+                                badge: "Oferta",
+                                stock: 8
                             },
                             {
                                 id: 3,
@@ -665,10 +816,12 @@
                                 category: "mujer",
                                 subcategory: "faldas",
                                 image: "https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                                description: "Falda plisada para look casual",
+                                description: "Falda plisada para look casual o semi-formal. Confeccionada en poliéster de alta calidad.",
+                                features: ["Pliegues perfectos", "Talla ajustable", "Material durable", "Múltiples colores"],
                                 featured: true,
                                 rating: 4.3,
-                                badge: "Más Vendido"
+                                badge: "Más Vendido",
+                                stock: 12
                             },
                             {
                                 id: 4,
@@ -677,9 +830,11 @@
                                 category: "mujer",
                                 subcategory: "pantalones",
                                 image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                                description: "Jeans de ajuste perfecto, tela premium",
+                                description: "Jeans de ajuste perfecto, tela premium con elasticidad para mayor comodidad.",
+                                features: ["Tela elastizada", "5 bolsillos", "Color durable", "Lavado especial"],
                                 featured: false,
-                                rating: 4.7
+                                rating: 4.7,
+                                stock: 20
                             },
                             {
                                 id: 5,
@@ -688,10 +843,12 @@
                                 category: "mujer",
                                 subcategory: "vestidos",
                                 image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                                description: "Elegante vestido largo para eventos formales",
+                                description: "Elegante vestido largo para eventos formales. Con detalles en encaje y corte princesa.",
+                                features: ["Encaje premium", "Corte princesa", "Forro interno", "Cremallera oculta"],
                                 featured: true,
                                 rating: 4.9,
-                                badge: "Exclusivo"
+                                badge: "Exclusivo",
+                                stock: 5
                             },
                             {
                                 id: 6,
@@ -701,9 +858,11 @@
                                 category: "mujer",
                                 subcategory: "blusas",
                                 image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                                description: "Blusa con manga campana, diseño único",
+                                description: "Blusa con manga campana, diseño único y moderno. Perfecta para looks casuales.",
+                                features: ["Diseño único", "Manga campana", "Tela suave", "Fácil de combinar"],
                                 featured: false,
-                                rating: 4.2
+                                rating: 4.2,
+                                stock: 18
                             }
                         ];
                     }
@@ -798,9 +957,9 @@
             container.innerHTML = productosFiltrados.map(product => `
                 <div class="product-card" data-id="${product.id}" data-category="${product.subcategory || 'general'}">
                     ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-                    <div class="product-img" style="background-image: url('${product.image}')">
+                    <div class="product-img" style="background-image: url('${product.image}')" onclick="openQuickView(${product.id})">
                         <div class="product-overlay">
-                            <button class="quick-view" onclick="quickView(${product.id})">
+                            <button class="quick-view-btn" onclick="openQuickView(${product.id})">
                                 <i class="fas fa-eye"></i> Vista Rápida
                             </button>
                         </div>
@@ -820,7 +979,7 @@
                             $${parseFloat(product.price).toFixed(2)}
                         </div>
                         
-                        ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
+                        ${product.description ? `<p class="product-description">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>` : ''}
                         
                         <button class="add-to-cart" data-id="${product.id}">
                             <i class="fas fa-shopping-cart"></i> Añadir al Carrito
@@ -831,7 +990,8 @@
             
             // Añadir event listeners a los botones de carrito
             document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     const productId = parseInt(this.dataset.id);
                     const product = productosFiltrados.find(p => p.id === productId);
                     
@@ -840,12 +1000,88 @@
                     }
                 });
             });
+            
+            // Hacer toda la tarjeta clickeable para vista rápida
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // No abrir vista rápida si se hace clic en el botón de carrito
+                    if (!e.target.closest('.add-to-cart')) {
+                        const productId = parseInt(this.dataset.id);
+                        openQuickView(productId);
+                    }
+                });
+            });
         }
         
-        function quickView(productId) {
+        // ============================================
+        // SISTEMA DE VISTA RÁPIDA
+        // ============================================
+        
+        function openQuickView(productId) {
             const product = productosFiltrados.find(p => p.id === productId);
-            if (product) {
-                alert(`Vista Rápida:\n\n${product.name}\n\nPrecio: $${product.price}\n\n${product.description || 'Descripción no disponible'}`);
+            if (!product) return;
+            
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="modal-img" style="background-image: url('${product.image}')"></div>
+                <div class="modal-details">
+                    <h2>${product.name}</h2>
+                    
+                    ${product.rating ? `
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="color: #f39c12; font-size: 18px;">
+                                ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5-Math.floor(product.rating))}
+                            </div>
+                            <span style="color: #95a5a6; margin-left: 10px;">${product.rating} / 5.0</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="modal-price">
+                        ${product.oldPrice ? `<span style="font-size: 20px; color: #95a5a6; text-decoration: line-through; margin-right: 10px;">$${parseFloat(product.oldPrice).toFixed(2)}</span>` : ''}
+                        $${parseFloat(product.price).toFixed(2)}
+                    </div>
+                    
+                    <p class="modal-description">${product.description || 'Descripción no disponible.'}</p>
+                    
+                    ${product.features ? `
+                        <ul class="modal-features">
+                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                    
+                    <div style="margin: 25px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #555;">Disponibilidad:</span>
+                            <span style="color: #27ae60; font-weight: 600;">${product.stock || 'Disponible'} en stock</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #555;">Categoría:</span>
+                            <span style="color: #3498db; font-weight: 600;">${product.subcategory || 'General'}</span>
+                        </div>
+                    </div>
+                    
+                    <button class="add-to-cart" onclick="addToCartFromModal(${product.id})" style="margin-top: 20px;">
+                        <i class="fas fa-shopping-cart"></i> Añadir al Carrito
+                    </button>
+                </div>
+            `;
+            
+            const modal = document.getElementById('quickViewModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeQuickView() {
+            const modal = document.getElementById('quickViewModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function addToCartFromModal(productId) {
+            const product = productosFiltrados.find(p => p.id === productId);
+            if (product && window.shoppingCart) {
+                window.shoppingCart.addProduct(product);
+                closeQuickView();
             }
         }
         
@@ -873,7 +1109,7 @@
                 if (openCartBtn) {
                     openCartBtn.addEventListener('click', (e) => {
                         e.preventDefault();
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html#cart';
                     });
                 }
             }
@@ -963,11 +1199,40 @@
                 });
             }
             
+            // Modal events
+            const closeModalBtn = document.getElementById('closeModal');
+            const modalOverlay = document.getElementById('quickViewModal');
+            
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeQuickView);
+            }
+            
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === modalOverlay) {
+                        closeQuickView();
+                    }
+                });
+            }
+            
+            // Cerrar modal con ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeQuickView();
+                }
+            });
+            
             // Actualizar productos cada 30 segundos
             setInterval(() => {
                 cargarProductos();
             }, 30000);
         });
+        
+        // Hacer funciones globales para eventos onclick
+        window.openQuickView = openQuickView;
+        window.closeQuickView = closeQuickView;
+        window.filtrarProductos = filtrarProductos;
+        window.addToCartFromModal = addToCartFromModal;
     </script>
 </body>
 </html>
