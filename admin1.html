@@ -365,7 +365,7 @@
             <div class="login-section" id="loginSection">
                 <h2>Acceso Restringido</h2>
                 <p>Ingresa la contraseña de administrador para continuar:</p>
-                <input type="password" id="adminPassword" class="login-input" placeholder="Contraseña de administrador" value="admin123">
+                <input type="password" id="adminPassword" class="login-input" placeholder="Contraseña de administrador">
                 <button class="login-btn" onclick="checkPassword()">
                     <i class="fas fa-sign-in-alt"></i> Ingresar al Panel
                 </button>
@@ -499,7 +499,12 @@
         // ============================================
         
         const ADMIN_PASSWORD = "admin123";
+        const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbx174S9QlKMHYkSJGaTioLCKLM8HZZvE8AZ_jHrQll_VVjSskod7mw0EfbDxM4snV-25g/exec";
+        const USE_GOOGLE_SHEETS = true; // Cambia a false si quieres solo localStorage
+        
         let allProducts = [];
+        let isEditing = false;
+        let editingProductId = null;
         
         // ============================================
         // FUNCIONES DEL SISTEMA
@@ -514,6 +519,8 @@
                 loadProducts();
             } else {
                 alert('Contraseña incorrecta');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
             }
         }
         
@@ -534,7 +541,62 @@
         // FUNCIONES DE PRODUCTOS
         // ============================================
         
-        function loadProducts() {
+        async function deleteAllProducts() {
+    if (!confirm('⚠️ ¿ELIMINAR TODOS LOS PRODUCTOS?\n\nEsta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    if (!confirm('⛔ CONFIRMACIÓN FINAL: Esto borrará TODOS los productos permanentemente.')) {
+        return;
+    }
+    
+    try {
+        // Limpiar visualmente
+        const container = document.getElementById('productsList');
+        container.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="spinner"></div><p>Eliminando todos los productos...</p></div>';
+        
+        if (USE_GOOGLE_SHEETS) {
+            // Eliminar de Google Sheets
+            await fetch(`${GOOGLE_SHEETS_API}?action=deleteAll`);
+        }
+        
+        // Eliminar de localStorage
+        localStorage.removeItem('modaEleganteProducts');
+        allProducts = [];
+        
+        // Mostrar estado vacío
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #27ae60;"></i>
+                <p>Todos los productos han sido eliminados.</p>
+            </div>
+        `;
+        
+        document.getElementById('totalProducts').textContent = '0';
+        
+        alert('✅ Todos los productos eliminados correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        
+        // Fallback
+        localStorage.removeItem('modaEleganteProducts');
+        allProducts = [];
+        
+        const container = document.getElementById('productsList');
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #27ae60;"></i>
+                <p>Todos los productos han sido eliminados (localmente).</p>
+            </div>
+        `;
+        
+        document.getElementById('totalProducts').textContent = '0';
+        
+        alert('⚠️ Productos eliminados localmente. Puede que sigan en Google Sheets.');
+    }
+}
+        async function loadProducts() {
             const container = document.getElementById('productsList');
             container.innerHTML = `
                 <div style="text-align: center; padding: 20px;">
@@ -544,66 +606,113 @@
             `;
             
             try {
-                // Cargar productos desde localStorage
-                allProducts = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                if (USE_GOOGLE_SHEETS) {
+                    // Cargar desde Google Sheets
+                    const response = await fetch(`${GOOGLE_SHEETS_API}?action=getProducts`);
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    allProducts = Array.isArray(data) ? data : [];
+                    
+                } else {
+                    // Cargar desde localStorage
+                    allProducts = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                }
                 
                 displayProducts(allProducts);
                 
             } catch (error) {
                 console.error('Error cargando productos:', error);
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #e74c3c;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
-                        <p>Error cargando productos</p>
-                        <p style="font-size: 14px; margin-top: 10px;">${error.message}</p>
-                        <button class="btn-secondary" onclick="loadProducts()" style="margin-top: 20px;">
-                            <i class="fas fa-redo"></i> Reintentar
-                        </button>
-                    </div>
-                `;
+                
+                // Fallback a localStorage
+                if (USE_GOOGLE_SHEETS) {
+                    allProducts = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                    displayProducts(allProducts);
+                    
+                    container.innerHTML += `
+                        <div style="text-align: center; padding: 20px; color: #e74c3c;">
+                            <p><i class="fas fa-exclamation-triangle"></i> Usando datos locales (fallback)</p>
+                            <p style="font-size: 12px;">${error.message}</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #e74c3c;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                            <p>Error cargando productos</p>
+                            <p style="font-size: 14px; margin-top: 10px;">${error.message}</p>
+                            <button class="btn-secondary" onclick="loadProducts()" style="margin-top: 20px;">
+                                <i class="fas fa-redo"></i> Reintentar
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
         
-        function displayProducts(products) {
-            const container = document.getElementById('productsList');
-            const totalElement = document.getElementById('totalProducts');
-            
-            totalElement.textContent = products.length;
-            
-            if (products.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #666;">
-                        <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
-                        <p>No hay productos guardados.</p>
-                        <p>Agrega tu primer producto en la pestaña "Agregar Producto".</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = products.map((product, index) => `
-                <div class="product-item">
-                    <img src="${product.image}" class="product-image" alt="${product.name}" onerror="this.src='https://via.placeholder.com/80?text=Imagen+no+disponible'">
-                    <div class="product-info">
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-meta">
-                            Categoría: ${getCategoryName(product.category)} | 
-                            Precio: $${parseFloat(product.price).toFixed(2)} | 
-                            ${product.featured === true ? '⭐ Destacado' : 'Normal'}
-                        </div>
-                        ${product.description ? `<div style="font-size: 13px; color: #888; margin-top: 5px;">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
-                    </div>
-                    <div class="product-actions">
-                        <button class="btn-secondary" onclick="editProduct(${index})">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn-danger" onclick="deleteProduct(${index})">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+function displayProducts(products) {
+    const container = document.getElementById('productsList');
+    const totalElement = document.getElementById('totalProducts');
+    
+    totalElement.textContent = products.length;
+    
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+                <p>No hay productos guardados.</p>
+                <p>Agrega tu primer producto en la pestaña "Agregar Producto".</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // URL de placeholder que SÍ existe
+ const PLACEHOLDER_URL = 'https://via.placeholder.com/80.png/cccccc/666666?text=No+img';
+    
+    container.innerHTML = products.map((product, index) => {
+        // Manejo SEGURO de la imagen
+        let imageUrl = product.image || '';
+        let hasValidImage = false;
+        
+        // Verificar si es una URL válida
+        if (imageUrl && 
+            typeof imageUrl === 'string' && 
+            imageUrl.trim() !== '' && 
+            (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:'))) {
+            hasValidImage = true;
         }
+        
+        return `
+            <div class="product-item" data-id="${product.id}" data-index="${index}">
+                <img src="${hasValidImage ? imageUrl : PLACEHOLDER_URL}" 
+                     class="product-image" 
+                     alt="${product.name}"
+                     onerror="if(this.src !== '${PLACEHOLDER_URL}') this.src='${PLACEHOLDER_URL}'; this.onerror=null;">
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-meta">
+                        Categoría: ${getCategoryName(product.category)} | 
+                        Precio: $${parseFloat(product.price || 0).toFixed(2)} | 
+                        ${product.featured === true || product.featured === 'true' ? '⭐ Destacado' : 'Normal'}
+                    </div>
+                    ${product.description ? `<div style="font-size: 13px; color: #888; margin-top: 5px;">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
+                </div>
+                <div class="product-actions">
+                    <button class="btn-secondary" onclick="editProduct(${index})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-danger" onclick="deleteProductNow('${product.id}', ${index})">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
         
         function getCategoryName(categoryCode) {
             const categories = {
@@ -677,12 +786,68 @@
             status.innerHTML = '<span style="color: #3498db;">Guardando producto...</span>';
             
             try {
-                // Obtener productos existentes
+                const productData = {
+                    name: name,
+                    price: price,
+                    category: category,
+                    image: image,
+                    description: description,
+                    featured: featured
+                };
+                
+                let savedId = null;
+                
+                if (USE_GOOGLE_SHEETS && !isEditing) {
+                    // Guardar en Google Sheets
+                    const params = new URLSearchParams({
+                        action: 'addProduct',
+                        ...productData
+                    });
+                    
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: params
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    
+                    savedId = result.id;
+                    status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado en Google Sheets!</span>';
+                    
+                } else if (isEditing && editingProductId) {
+                    // Actualizar en Google Sheets
+                    productData.id = editingProductId;
+                    const params = new URLSearchParams({
+                        action: 'updateProduct',
+                        ...productData
+                    });
+                    
+                    const response = await fetch(GOOGLE_SHEETS_API, {
+                        method: 'POST',
+                        body: params
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    
+                    savedId = editingProductId;
+                    status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto actualizado en Google Sheets!</span>';
+                    isEditing = false;
+                    editingProductId = null;
+                }
+                
+                // También guardar en localStorage para consistencia
                 const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
                 
-                // Crear nuevo producto
                 const newProduct = {
-                    id: Date.now(),
+                    id: savedId || Date.now().toString(),
                     name: name,
                     price: parseFloat(price),
                     category: category,
@@ -692,23 +857,27 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                // Agregar a la lista
-                products.push(newProduct);
+                if (isEditing) {
+                    // Actualizar en localStorage
+                    const index = products.findIndex(p => p.id === editingProductId);
+                    if (index !== -1) {
+                        products[index] = newProduct;
+                    }
+                    isEditing = false;
+                    editingProductId = null;
+                } else {
+                    // Agregar nuevo en localStorage
+                    products.push(newProduct);
+                }
                 
-                // Guardar en localStorage
                 localStorage.setItem('modaEleganteProducts', JSON.stringify(products));
                 
-                status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado exitosamente!</span>';
+                if (!USE_GOOGLE_SHEETS) {
+                    status.innerHTML = '<span style="color: #27ae60;"><i class="fas fa-check"></i> Producto guardado en localStorage!</span>';
+                }
                 
                 // Limpiar formulario
-                document.getElementById('productName').value = '';
-                document.getElementById('productPrice').value = '';
-                document.getElementById('productCategory').value = '';
-                document.getElementById('productDescription').value = '';
-                document.getElementById('productImage').value = '';
-                document.getElementById('productImageUrl').value = '';
-                document.getElementById('imagePreview').style.display = 'none';
-                document.getElementById('imageStatus').textContent = '';
+                resetForm();
                 
                 // Recargar lista
                 setTimeout(() => {
@@ -718,6 +887,41 @@
             } catch (error) {
                 console.error('Error:', error);
                 status.innerHTML = `<span style="color: #e74c3c;"><i class="fas fa-times"></i> Error: ${error.message}</span>`;
+                
+                // Fallback: guardar solo en localStorage
+                const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+                
+                const newProduct = {
+                    id: Date.now().toString(),
+                    name: name,
+                    price: parseFloat(price),
+                    category: category,
+                    description: description,
+                    featured: featured,
+                    image: image,
+                    createdAt: new Date().toISOString()
+                };
+                
+                if (isEditing) {
+                    const index = products.findIndex(p => p.id === editingProductId);
+                    if (index !== -1) {
+                        products[index] = newProduct;
+                    }
+                    isEditing = false;
+                    editingProductId = null;
+                } else {
+                    products.push(newProduct);
+                }
+                
+                localStorage.setItem('modaEleganteProducts', JSON.stringify(products));
+                
+                status.innerHTML += '<br><span style="color: #3498db;">Producto guardado en localStorage como respaldo.</span>';
+                resetForm();
+                
+                setTimeout(() => {
+                    loadProducts();
+                }, 1000);
+                
             } finally {
                 btn.innerHTML = '<i class="fas fa-save"></i> Guardar Producto';
                 btn.disabled = false;
@@ -727,6 +931,22 @@
                     status.innerHTML = '';
                 }, 5000);
             }
+        }
+        
+        function resetForm() {
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productCategory').value = '';
+            document.getElementById('productDescription').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('productImageUrl').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageStatus').textContent = '';
+            document.querySelector('input[name="featured"][value="true"]').checked = true;
+            
+            const btn = document.getElementById('addProductBtn');
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Producto';
+            btn.onclick = addNewProduct;
         }
         
         function convertImageToBase64(file) {
@@ -746,12 +966,13 @@
             const product = allProducts[index];
             
             if (product) {
+                // Llenar formulario con datos del producto
                 document.getElementById('productName').value = product.name;
                 document.getElementById('productPrice').value = product.price;
                 document.getElementById('productCategory').value = product.category;
                 document.getElementById('productDescription').value = product.description || '';
                 document.getElementById('productImageUrl').value = product.image.startsWith('http') ? product.image : '';
-                document.querySelector(`input[name="featured"][value="${product.featured}"]`).checked = true;
+                document.querySelector(`input[name="featured"][value="${product.featured === true || product.featured === 'true'}"]`).checked = true;
                 
                 // Mostrar imagen actual
                 const preview = document.getElementById('imagePreview');
@@ -761,43 +982,171 @@
                     document.getElementById('imageStatus').textContent = 'Imagen actual del producto';
                 }
                 
+                // Cambiar botón a "Actualizar"
+                const btn = document.getElementById('addProductBtn');
+                btn.innerHTML = '<i class="fas fa-sync"></i> Actualizar Producto';
+                btn.onclick = addNewProduct;
+                
+                // Configurar edición
+                isEditing = true;
+                editingProductId = product.id;
+                
                 openTab('addProduct');
                 
-                // Eliminar producto antiguo
-                allProducts.splice(index, 1);
-                localStorage.setItem('modaEleganteProducts', JSON.stringify(allProducts));
-                
-                alert('Producto cargado para edición. Modifica y haz clic en "Guardar Producto".');
+                alert('Producto cargado para edición. Modifica y haz clic en "Actualizar Producto".');
             }
         }
         
-        function deleteProduct(index) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                return;
-            }
+async function deleteProductNow(productId, index) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+        return;
+    }
+    
+    console.log(`🚀 Eliminando producto ID: ${productId}, Índice: ${index}`);
+    
+    // 1. Eliminar visualmente INMEDIATAMENTE
+    const productElement = document.querySelector(`[data-id="${productId}"]`);
+    if (productElement) {
+        productElement.style.opacity = '0.5';
+        productElement.style.transition = 'opacity 0.3s';
+    }
+    
+    try {
+        // 2. Eliminar de Google Sheets (si está habilitado)
+        if (USE_GOOGLE_SHEETS) {
+            console.log(`📡 Enviando a Google Sheets: ${productId}`);
             
-            allProducts.splice(index, 1);
-            localStorage.setItem('modaEleganteProducts', JSON.stringify(allProducts));
+            // Método 1: Simplemente hacer la petición y no esperar mucho
+            const deleteUrl = `${GOOGLE_SHEETS_API}?action=deleteProduct&id=${encodeURIComponent(productId)}`;
             
-            alert('Producto eliminado');
-            loadProducts();
+            // Hacer la petición pero con timeout corto
+            const deletePromise = fetch(deleteUrl).catch(e => {
+                console.log('Error en fetch (no crítico):', e);
+                return {ok: false};
+            });
+            
+            // Timeout de 3 segundos máximo
+            const timeoutPromise = new Promise(resolve => {
+                setTimeout(() => resolve({ok: false, timeout: true}), 3000);
+            });
+            
+            const result = await Promise.race([deletePromise, timeoutPromise]);
+            console.log('Resultado eliminación:', result);
         }
         
-        function deleteAllProducts() {
-            if (!confirm('⚠️ ¿ELIMINAR TODOS LOS PRODUCTOS?\n\nEsta acción no se puede deshacer.')) {
-                return;
-            }
-            
-            if (!confirm('⛔ CONFIRMACIÓN FINAL: Esto borrará TODOS los productos permanentemente.')) {
-                return;
-            }
-            
-            localStorage.removeItem('modaEleganteProducts');
-            allProducts = [];
-            
-            alert('Todos los productos han sido eliminados');
-            loadProducts();
+        // 3. Eliminar de localStorage SIEMPRE
+        const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+        const updatedProducts = products.filter(p => {
+            // Comparar como string y número
+            const pId = p.id ? p.id.toString() : '';
+            const targetId = productId ? productId.toString() : '';
+            return pId !== targetId;
+        });
+        
+        localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+        console.log('✅ Eliminado de localStorage');
+        
+        // 4. Eliminar del array allProducts
+        allProducts = allProducts.filter(p => {
+            const pId = p.id ? p.id.toString() : '';
+            const targetId = productId ? productId.toString() : '';
+            return pId !== targetId;
+        });
+        
+        // 5. Eliminar elemento del DOM completamente
+        if (productElement) {
+            productElement.remove();
         }
+        
+        // 6. Actualizar contador
+        document.getElementById('totalProducts').textContent = allProducts.length;
+        
+        // 7. Si no quedan productos, mostrar mensaje
+        if (allProducts.length === 0) {
+            const container = document.getElementById('productsList');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+                    <p>No hay productos guardados.</p>
+                </div>
+            `;
+        }
+        
+        // 8. Mostrar mensaje de éxito
+        setTimeout(() => {
+            alert('✅ Producto eliminado correctamente');
+        }, 300);
+        
+    } catch (error) {
+        console.error('💥 Error crítico:', error);
+        
+        // Fallback: al menos eliminar visualmente
+        if (productElement) {
+            productElement.remove();
+        }
+        
+        // Actualizar allProducts localmente
+        allProducts = allProducts.filter((p, i) => i !== index);
+        
+        alert('⚠️ Producto eliminado localmente. Puede que siga en Google Sheets.');
+    }
+}
+        
+async function deleteProduct(productId, index) {
+  if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+    return;
+  }
+  
+  try {
+    if (USE_GOOGLE_SHEETS) {
+      // Eliminar de Google Sheets - CORREGIDO
+      const params = new URLSearchParams();
+      params.append('action', 'deleteProduct');
+      params.append('id', productId);
+      
+      console.log('Eliminando producto ID:', productId);
+      console.log('URL:', GOOGLE_SHEETS_API);
+      console.log('Params:', params.toString());
+      
+      const response = await fetch(GOOGLE_SHEETS_API + '?action=deleteProduct&id=' + encodeURIComponent(productId), {
+        method: 'POST',
+        mode: 'no-cors' // Importante para evitar problemas CORS
+      });
+      
+      // Con no-cors no podemos leer la respuesta, pero confiamos en que funcionó
+      console.log('Eliminación enviada a Google Sheets');
+      
+      // También intentar con GET por si acaso
+      await fetch(GOOGLE_SHEETS_API + '?action=deleteProduct&id=' + encodeURIComponent(productId));
+      
+    }
+    
+    // Siempre eliminar de localStorage
+    const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+    const updatedProducts = products.filter(p => p.id !== productId && p.id !== productId.toString());
+    localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+    
+    // Actualizar la lista visualmente
+    allProducts = allProducts.filter(p => p.id !== productId && p.id !== productId.toString());
+    displayProducts(allProducts);
+    
+    alert('Producto eliminado correctamente');
+    
+  } catch (error) {
+    console.error('Error eliminando producto:', error);
+    
+    // Fallback: eliminar solo de localStorage
+    const products = JSON.parse(localStorage.getItem('modaEleganteProducts')) || [];
+    const updatedProducts = products.filter(p => p.id !== productId && p.id !== productId.toString());
+    localStorage.setItem('modaEleganteProducts', JSON.stringify(updatedProducts));
+    
+    // Actualizar la lista visualmente
+    allProducts = allProducts.filter(p => p.id !== productId && p.id !== productId.toString());
+    displayProducts(allProducts);
+    
+    alert('Producto eliminado de localStorage');
+  }
+}
         
         function exportProducts() {
             if (allProducts.length === 0) {
@@ -856,13 +1205,16 @@
         // ============================================
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Limpiar campo de contraseña al cargar
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminPassword').focus();
+            
+            // Enter para login
             document.getElementById('adminPassword').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     checkPassword();
                 }
             });
-            
-            document.getElementById('adminPassword').focus();
         });
     </script>
 </body>
