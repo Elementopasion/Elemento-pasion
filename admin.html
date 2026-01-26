@@ -794,13 +794,15 @@
             status.innerHTML = '<span style="color: #3498db;">Guardando producto...</span>';
             
             try {
+                // CORRECCIÓN: Agregar createdAt que espera Google Apps Script
                 const productData = {
                     name: name,
                     price: price,
                     category: category,
                     image: image,
                     description: description,
-                    featured: featured
+                    featured: featured,
+                    createdAt: new Date().toISOString()  // CAMBIO IMPORTANTE AQUÍ
                 };
                 
                 let savedId = null;
@@ -822,6 +824,9 @@
                 } else if (isEditing && editingProductId) {
                     // Actualizar en Google Sheets usando GET simple
                     productData.id = editingProductId;
+                    // Para edición, NO incluir createdAt porque no debe actualizarse
+                    delete productData.createdAt;
+                    
                     const params = new URLSearchParams(productData);
                     const response = await fetch(`${GOOGLE_SHEETS_API}?action=updateProduct&${params.toString()}`);
                     
@@ -880,6 +885,7 @@
                 
             } catch (error) {
                 console.error('Error:', error);
+                console.log('Datos enviados:', productData); // Para debug
                 status.innerHTML = `<span style="color: #e74c3c;"><i class="fas fa-times"></i> Error: ${error.message}</span>`;
                 
                 // Fallback: guardar solo en localStorage
