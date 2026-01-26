@@ -206,11 +206,13 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
         }
         
         .product-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
         .product-img {
@@ -218,6 +220,11 @@
             background-size: cover;
             background-position: center;
             background-color: #f8f9fa;
+            transition: transform 0.5s ease;
+        }
+        
+        .product-card:hover .product-img {
+            transform: scale(1.05);
         }
         
         .product-content {
@@ -228,6 +235,11 @@
             font-size: 18px;
             margin-bottom: 10px;
             color: #2c3e50;
+            cursor: pointer;
+        }
+        
+        .product-title:hover {
+            color: #e74c3c;
         }
         
         .product-price {
@@ -242,20 +254,302 @@
             margin-bottom: 15px;
         }
         
-        .add-to-cart {
+        .product-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .product-category {
+            background: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .view-details-btn {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: 600;
-            width: 100%;
+            font-size: 14px;
+            flex: 1;
+            transition: background-color 0.3s;
+        }
+        
+        .view-details-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .add-to-cart {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
             transition: background-color 0.3s;
         }
         
         .add-to-cart:hover {
-            background-color: #2980b9;
+            background-color: #219653;
+        }
+        
+        /* ========== MODAL DE DETALLE DE PRODUCTO ========== */
+        .product-detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .product-detail-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .product-detail-container {
+            background: white;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-detail-header {
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        
+        .close-detail:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .product-detail-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .product-detail-content {
+                flex-direction: column;
+            }
+        }
+        
+        .product-detail-images {
+            flex: 1;
+            padding: 30px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .main-product-image {
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        
+        .main-product-image.zoomed {
+            transform: scale(1.5);
+            cursor: zoom-out;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .product-thumbnails {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .product-thumbnail {
+            width: 80px;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        
+        .product-thumbnail:hover {
+            transform: scale(1.1);
+        }
+        
+        .product-thumbnail.active {
+            border-color: #3498db;
+        }
+        
+        .product-detail-info {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .product-detail-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .product-detail-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .product-detail-rating {
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .product-detail-category {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .product-detail-description {
+            margin-bottom: 25px;
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .product-detail-features {
+            margin-bottom: 25px;
+        }
+        
+        .product-detail-features h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .product-detail-features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .product-detail-features li {
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .product-detail-features li:before {
+            content: "✓";
+            color: #27ae60;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .product-detail-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .product-detail-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .product-detail-btn.buy {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .product-detail-btn.buy:hover {
+            background: #c0392b;
+        }
+        
+        .product-detail-btn.cart {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .product-detail-btn.cart:hover {
+            background: #219653;
         }
         
         /* ========== MODAL DEL CARRITO ========== */
@@ -275,6 +569,12 @@
         
         .cart-modal.active {
             display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
         
         .cart-header {
@@ -594,6 +894,14 @@
                 width: 95%;
                 padding: 20px;
             }
+            
+            .product-detail-actions {
+                flex-direction: column;
+            }
+            
+            .product-detail-btn {
+                width: 100%;
+            }
         }
         
         /* ========== ESTILOS PARA CARGA DE PRODUCTOS ========== */
@@ -619,11 +927,6 @@
         }
         
         /* ========== ANIMACIONES ========== */
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
         @keyframes slideOut {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
@@ -639,7 +942,7 @@
             padding: 15px 20px;
             border-radius: 5px;
             z-index: 10000;
-            animation: slideIn 0.3s ease;
+            animation: fadeIn 0.3s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
@@ -810,6 +1113,20 @@
         </div>
     </footer>
 
+    <!-- Modal de Detalle de Producto -->
+    <div class="product-detail-modal" id="productDetailModal">
+        <div class="product-detail-container">
+            <div class="product-detail-header">
+                <h2>Detalles del Producto</h2>
+                <button class="close-detail" id="closeDetail">&times;</button>
+            </div>
+            
+            <div class="product-detail-content" id="productDetailContent">
+                <!-- El contenido se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
     <!-- Modal del Carrito -->
     <div class="cart-modal" id="cartModal">
         <div class="cart-header">
@@ -946,13 +1263,14 @@
         class ProductManager {
             constructor() {
                 this.products = [];
+                this.currentProduct = null;
                 this.init();
             }
             
             async init() {
                 await this.loadProducts();
                 this.displayFeaturedProducts();
-                this.setupCartButtons();
+                this.setupProductDetails();
             }
             
             async loadProducts() {
@@ -994,8 +1312,9 @@
                         price: 49.99,
                         category: "mujer",
                         image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                        description: "Vestido elegante para ocasiones especiales",
-                        featured: true
+                        description: "Vestido elegante para ocasiones especiales. Hecho con tela de alta calidad, cómodo y con un diseño moderno que te hará destacar en cualquier evento.",
+                        featured: true,
+                        features: ["Tela de alta calidad", "Corte moderno", "Comodidad garantizada", "Lavable a máquina"]
                     },
                     {
                         id: 2,
@@ -1003,8 +1322,9 @@
                         price: 34.99,
                         category: "hombre",
                         image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                        description: "Camisa casual para el día a día",
-                        featured: true
+                        description: "Camisa casual para el día a día. Perfecta para la oficina o eventos informales. Disponible en varios colores.",
+                        featured: true,
+                        features: ["100% algodón", "Cuello clásico", "Mangas largas", "Planchado fácil"]
                     },
                     {
                         id: 3,
@@ -1012,8 +1332,9 @@
                         price: 89.99,
                         category: "hombre",
                         image: "https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                        description: "Chaqueta de cuero genuino",
-                        featured: true
+                        description: "Chaqueta de cuero genuino con diseño moderno. Abrigadora y elegante para cualquier ocasión.",
+                        featured: true,
+                        features: ["Cuero genuino", "Forro interior cálido", "Cierre de cremallera", "Bolsillos laterales"]
                     },
                     {
                         id: 4,
@@ -1021,8 +1342,9 @@
                         price: 59.99,
                         category: "calzado",
                         image: "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                        description: "Zapatos deportivos cómodos",
-                        featured: true
+                        description: "Zapatos deportivos cómodos para el día a día o para hacer ejercicio. Suela antideslizante y materiales transpirables.",
+                        featured: true,
+                        features: ["Suela antideslizante", "Material transpirable", "Plantilla ergonómica", "Ligero y cómodo"]
                     }
                 ];
             }
@@ -1046,27 +1368,203 @@
                 
                 container.innerHTML = featured.map(product => `
                     <div class="product-card" data-id="${product.id}">
-                        <div class="product-img" style="background-image: url('${product.image}')"></div>
+                        <div class="product-img" style="background-image: url('${product.image}')" onclick="productManager.showProductDetail(${product.id})"></div>
                         <div class="product-content">
-                            <h3 class="product-title">${product.name}</h3>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
+                            <h3 class="product-title" onclick="productManager.showProductDetail(${product.id})">${product.name}</h3>
+                            <div class="product-meta">
+                                <span class="product-category">${this.getCategoryName(product.category)}</span>
+                                <div class="product-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <span style="color: #666; font-size: 12px; margin-left: 5px;">(4.5)</span>
+                                </div>
                             </div>
                             <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
-                            <button class="add-to-cart" onclick="window.shoppingCart.addProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                                Añadir al Carrito
-                            </button>
+                            <div class="product-actions">
+                                <button class="view-details-btn" onclick="productManager.showProductDetail(${product.id})">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </button>
+                                <button class="add-to-cart" onclick="window.shoppingCart.addProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-cart-plus"></i> Añadir
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `).join('');
             }
             
-            setupCartButtons() {
-                // Los botones ya tienen el onclick directamente
+            getCategoryName(categoryCode) {
+                const categories = {
+                    'hombre': 'Hombre',
+                    'mujer': 'Mujer',
+                    'ninos': 'Niños',
+                    'accesorios': 'Accesorios',
+                    'calzado': 'Calzado',
+                    'ofertas': 'Ofertas'
+                };
+                return categories[categoryCode] || categoryCode;
+            }
+            
+            setupProductDetails() {
+                // Cerrar modal con Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeProductDetail();
+                    }
+                });
+                
+                // Cerrar modal al hacer clic fuera
+                const modal = document.getElementById('productDetailModal');
+                if (modal) {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            this.closeProductDetail();
+                        }
+                    });
+                }
+                
+                // Botón cerrar
+                const closeBtn = document.getElementById('closeDetail');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        this.closeProductDetail();
+                    });
+                }
+            }
+            
+            showProductDetail(productId) {
+                const product = this.products.find(p => p.id == productId);
+                if (!product) return;
+                
+                this.currentProduct = product;
+                this.renderProductDetail(product);
+                this.openProductDetail();
+            }
+            
+            renderProductDetail(product) {
+                const container = document.getElementById('productDetailContent');
+                if (!container) return;
+                
+                const categoryName = this.getCategoryName(product.category);
+                
+                // Generar características si no existen
+                const features = product.features || [
+                    "Material de alta calidad",
+                    "Diseño moderno y elegante",
+                    "Comodidad garantizada",
+                    "Disponible en varios colores"
+                ];
+                
+                container.innerHTML = `
+                    <div class="product-detail-images">
+                        <div class="main-product-image" id="mainProductImage" 
+                             style="background-image: url('${product.image}')"
+                             onclick="productManager.toggleZoom()"></div>
+                        <div class="product-thumbnails">
+                            <div class="product-thumbnail active" 
+                                 style="background-image: url('${product.image}')"
+                                 onclick="productManager.changeMainImage('${product.image}')"></div>
+                            <!-- Podrías agregar más miniaturas aquí si el producto tiene más imágenes -->
+                        </div>
+                    </div>
+                    <div class="product-detail-info">
+                        <h1 class="product-detail-title">${product.name}</h1>
+                        <div class="product-detail-price">$${parseFloat(product.price).toFixed(2)}</div>
+                        <div class="product-detail-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span style="color: #666; margin-left: 10px;">4.5 (128 reseñas)</span>
+                        </div>
+                        <span class="product-detail-category">${categoryName}</span>
+                        
+                        <div class="product-detail-description">
+                            <h3>Descripción</h3>
+                            <p>${product.description || 'Producto de alta calidad con diseño moderno y elegante.'}</p>
+                        </div>
+                        
+                        <div class="product-detail-features">
+                            <h3>Características</h3>
+                            <ul>
+                                ${features.map(feature => `<li>${feature}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                            <h3 style="margin-bottom: 10px;">Información adicional</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <div><strong>Categoría:</strong> ${categoryName}</div>
+                                <div><strong>Disponibilidad:</strong> <span style="color: #27ae60;">En stock</span></div>
+                                <div><strong>Envío:</strong> 3-5 días hábiles</div>
+                                <div><strong>Devoluciones:</strong> 30 días</div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-detail-actions">
+                            <button class="product-detail-btn buy" onclick="window.shoppingCart.addProduct(${JSON.stringify(product).replace(/"/g, '&quot;')}); productManager.closeProductDetail(); window.shoppingCart.openCart();">
+                                <i class="fas fa-bolt"></i> Comprar Ahora
+                            </button>
+                            <button class="product-detail-btn cart" onclick="window.shoppingCart.addProduct(${JSON.stringify(product).replace(/"/g, '&quot;')}); productManager.showAddToCartNotification();">
+                                <i class="fas fa-cart-plus"></i> Añadir al Carrito
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            changeMainImage(imageUrl) {
+                const mainImage = document.getElementById('mainProductImage');
+                if (mainImage) {
+                    mainImage.style.backgroundImage = `url('${imageUrl}')`;
+                    mainImage.classList.remove('zoomed');
+                    
+                    // Actualizar miniatura activa
+                    document.querySelectorAll('.product-thumbnail').forEach(thumb => {
+                        thumb.classList.remove('active');
+                    });
+                    
+                    // Marcar la miniatura correspondiente como activa
+                    const activeThumb = Array.from(document.querySelectorAll('.product-thumbnail')).find(thumb => 
+                        thumb.style.backgroundImage.includes(imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+                    );
+                    if (activeThumb) {
+                        activeThumb.classList.add('active');
+                    }
+                }
+            }
+            
+            toggleZoom() {
+                const mainImage = document.getElementById('mainProductImage');
+                if (mainImage) {
+                    mainImage.classList.toggle('zoomed');
+                }
+            }
+            
+            openProductDetail() {
+                const modal = document.getElementById('productDetailModal');
+                if (modal) {
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Evitar scroll en el fondo
+                }
+            }
+            
+            closeProductDetail() {
+                const modal = document.getElementById('productDetailModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = ''; // Restaurar scroll
+                }
+            }
+            
+            showAddToCartNotification() {
+                if (this.currentProduct) {
+                    window.shoppingCart.showNotification(this.currentProduct.name);
+                }
             }
         }
 
