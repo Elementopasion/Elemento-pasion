@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moda Mujer - Elemento Pasión</title>
+    <title>Ropa de Mujer - Elemento Pasión</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ========== ESTILOS GENERALES ========== */
@@ -75,11 +75,6 @@
             color: #e74c3c;
         }
         
-        .active {
-            color: #e74c3c !important;
-            border-bottom: 2px solid #e74c3c;
-        }
-        
         .cart-icon {
             position: relative;
             font-size: 20px;
@@ -106,140 +101,52 @@
             cursor: pointer;
         }
         
-        /* ========== HEADER DE CATEGORÍA ESPECÍFICO ========== */
+        /* ========== HEADER DE CATEGORÍA ========== */
         .category-header {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80');
             background-size: cover;
             background-position: center;
             color: white;
             text-align: center;
-            padding: 120px 0;
+            padding: 100px 0;
             margin-bottom: 50px;
         }
         
         .category-header h1 {
-            font-size: 56px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            font-size: 48px;
+            margin-bottom: 20px;
         }
         
-        .category-header p {
-            font-size: 20px;
-            max-width: 600px;
-            margin: 0 auto 30px;
-            opacity: 0.9;
-        }
-        
-        /* ========== FILTROS DE CATEGORÍA ========== */
-        .category-filters {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .filters-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .filter-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .filter-btn {
-            padding: 8px 20px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .filter-btn:hover {
-            border-color: #e74c3c;
-            color: #e74c3c;
-        }
-        
-        .filter-btn.active {
-            background: #e74c3c;
-            color: white;
-            border-color: #e74c3c;
-        }
-        
-        .sort-select {
-            padding: 8px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            background: white;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        /* ========== PRODUCTOS MEJORADOS ========== */
+        /* ========== PRODUCTOS ========== */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 35px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
             padding: 40px 0;
         }
         
         .product-card {
             background-color: white;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s ease;
-            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
         }
         
         .product-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-        
-        .product-badge {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: #e74c3c;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            z-index: 2;
-        }
-        
-        .product-img-container {
-            height: 300px;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
+            transform: translateY(-5px);
         }
         
         .product-img {
-            width: 100%;
-            height: 100%;
+            height: 250px;
             background-size: cover;
             background-position: center;
             background-color: #f8f9fa;
-            transition: transform 0.5s ease;
+            cursor: pointer;
+            position: relative;
         }
         
-        .product-card:hover .product-img {
-            transform: scale(1.05);
-        }
-        
-        .product-overlay {
+        .quick-view-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -253,7 +160,7 @@
             transition: opacity 0.3s;
         }
         
-        .product-card:hover .product-overlay {
+        .product-img:hover .quick-view-overlay {
             opacity: 1;
         }
         
@@ -261,210 +168,150 @@
             background: white;
             color: #e74c3c;
             border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
+            padding: 10px 20px;
+            border-radius: 5px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
-        }
-        
-        .quick-view-btn:hover {
-            background: #2c3e50;
-            color: white;
-            transform: scale(1.05);
         }
         
         .product-content {
-            padding: 25px;
+            padding: 20px;
         }
         
         .product-title {
             font-size: 18px;
             margin-bottom: 10px;
             color: #2c3e50;
-            min-height: 45px;
-            cursor: pointer;
-        }
-        
-        .product-title:hover {
-            color: #e74c3c;
         }
         
         .product-price {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: #e74c3c;
             margin-bottom: 15px;
         }
         
-        .product-old-price {
-            font-size: 16px;
-            color: #95a5a6;
-            text-decoration: line-through;
-            margin-right: 10px;
-        }
-        
-        .product-rating {
-            color: #f39c12;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-        
-        .product-description {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        
         .add-to-cart {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 600;
             width: 100%;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            transition: background-color 0.3s;
         }
         
         .add-to-cart:hover {
-            background: linear-gradient(135deg, #2980b9, #21618c);
-            transform: translateY(-2px);
+            background-color: #2980b9;
         }
         
-        /* ========== MODAL DE VISTA RÁPIDA ========== */
-        .modal-overlay {
+        .back-btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 30px 0;
+        }
+        
+        /* ========== MODAL SIMPLE ========== */
+        .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            display: none;
+            z-index: 2000;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
         }
         
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-        
-        .quick-view-modal {
+        .modal-content {
             background: white;
-            border-radius: 15px;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
             width: 90%;
-            max-width: 900px;
-            max-height: 90vh;
-            overflow-y: auto;
             position: relative;
-            transform: scale(0.9);
-            transition: transform 0.3s;
+            animation: modalFadeIn 0.3s;
         }
         
-        .modal-overlay.active .quick-view-modal {
-            transform: scale(1);
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .modal-close {
+        .close-modal {
             position: absolute;
             top: 15px;
             right: 15px;
             background: #e74c3c;
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 20px;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-close:hover {
-            background: #c0392b;
-        }
-        
-        .modal-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            padding: 40px;
+            font-size: 16px;
         }
         
         .modal-img {
             width: 100%;
-            height: 400px;
+            height: 300px;
             background-size: cover;
             background-position: center;
-            border-radius: 10px;
-        }
-        
-        .modal-details h2 {
-            font-size: 28px;
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .modal-price {
-            font-size: 32px;
-            color: #e74c3c;
-            font-weight: 700;
-            margin: 20px 0;
-        }
-        
-        .modal-description {
-            color: #7f8c8d;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            font-size: 16px;
-        }
-        
-        .modal-features {
-            list-style: none;
-            margin: 20px 0;
-            padding: 0;
-        }
-        
-        .modal-features li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            color: #555;
-        }
-        
-        .modal-features li:before {
-            content: "✓";
-            color: #27ae60;
-            margin-right: 10px;
-            font-weight: bold;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
         
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
-            .modal-content {
-                grid-template-columns: 1fr;
-                gap: 25px;
-                padding: 25px;
+            .menu-toggle {
+                display: block;
             }
             
-            .modal-img {
-                height: 300px;
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            nav ul li {
+                margin: 10px 0;
+                margin-left: 0;
+            }
+            
+            .category-header h1 {
+                font-size: 36px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -482,12 +329,12 @@
                 <ul id="navMenu">
                     <li><a href="index.html">Inicio</a></li>
                     <li><a href="categoria-hombre.html">Hombre</a></li>
-                    <li><a href="categoria-mujer.html" class="active">Mujer</a></li>
+                    <li><a href="categoria-mujer.html">Mujer</a></li>
                     <li><a href="categoria-accesorios.html">Accesorios</a></li>
                     <li><a href="categoria-ninos.html">Niños</a></li>
                     <li><a href="categoria-calzado.html">Calzado</a></li>
                     <li>
-                        <a href="index.html#cart" class="cart-icon" id="openCart">
+                        <a href="#" class="cart-icon" id="openCart">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="cart-count" id="cartCount">0</span>
                         </a>
@@ -499,393 +346,217 @@
 
     <section class="category-header">
         <div class="container">
-            <h1>Colección Mujer</h1>
-            <p>Descubre la elegancia y sofisticación en cada prenda. Moda diseñada para la mujer moderna</p>
+            <h1>Ropa de Mujer</h1>
+            <p>Descubre nuestra colección exclusiva para mujeres</p>
         </div>
     </section>
 
     <div class="container">
-        <!-- Grid de Productos -->
         <div class="products-grid" id="productsContainer">
-            <div class="loading-products">
-                <div class="spinner"></div>
-                <p>Cargando colección para mujer...</p>
-            </div>
+            <!-- Productos se cargarán aquí -->
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
         </div>
     </div>
 
-    <!-- Modal de Vista Rápida -->
-    <div class="modal-overlay" id="quickViewModal">
-        <div class="quick-view-modal">
-            <button class="modal-close" id="closeModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-content" id="modalContent">
-                <!-- Contenido dinámico -->
-            </div>
+    <!-- Modal para vista rápida -->
+    <div class="modal" id="quickViewModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <div class="modal-img" id="modalImg"></div>
+            <h2 id="modalTitle"></h2>
+            <div class="product-price" id="modalPrice"></div>
+            <p id="modalDescription"></p>
+            <button class="add-to-cart" id="modalAddToCart">Añadir al Carrito</button>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
-        const CATEGORIA = 'mujer';
-        
-        // Datos de ejemplo para productos de mujer
+        // Datos de productos de mujer
         const productosMujer = [
             {
                 id: 1,
                 name: "Vestido Elegante Negro",
-                price: 89.99,
-                oldPrice: 119.99,
+                price: 49.99,
                 category: "mujer",
-                subcategory: "vestidos",
                 image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                description: "Vestido elegante para ocasiones especiales. Confeccionado en tela de alta calidad, perfecto para eventos formales y cenas elegantes. Corte que realza la figura con detalles en la espalda.",
-                features: ["Tela premium", "Ajuste perfecto", "Corte moderno", "Lavable a máquina", "Color negro clásico"],
-                rating: 4.8,
-                badge: "Nuevo",
-                stock: 15,
-                sizes: ["XS", "S", "M", "L", "XL"]
+                description: "Vestido elegante para ocasiones especiales. Confeccionado en tela de alta calidad."
             },
             {
                 id: 2,
-                name: "Blusa de Seda Elegante",
-                price: 49.99,
-                oldPrice: 69.99,
+                name: "Blusa de Seda",
+                price: 29.99,
                 category: "mujer",
-                subcategory: "blusas",
                 image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                description: "Blusa de seda natural, cómoda y elegante. Ideal para el trabajo o reuniones sociales. Tela suave y transpirable con un corte que favorece cualquier tipo de cuerpo.",
-                features: ["Seda 100% natural", "Botones ocultos", "Corte clásico", "Tela transpirable", "Múltiples colores"],
-                rating: 4.5,
-                badge: "Oferta",
-                stock: 8,
-                sizes: ["S", "M", "L"]
+                description: "Blusa de seda natural, cómoda y elegante para cualquier ocasión."
             },
             {
                 id: 3,
-                name: "Falda Plisada Moderna",
-                price: 59.99,
+                name: "Falda Plisada",
+                price: 34.99,
                 category: "mujer",
-                subcategory: "faldas",
                 image: "https://images.unsplash.com/photo-1544441893-675973e31985?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                description: "Falda plisada para look casual o semi-formal. Confeccionada en poliéster de alta calidad que mantiene su forma. Perfecta para combinar con blusas o camisetas.",
-                features: ["Pliegues perfectos", "Talla ajustable", "Material durable", "Múltiples colores", "Lavable a máquina"],
-                rating: 4.3,
-                badge: "Más Vendido",
-                stock: 12,
-                sizes: ["XS", "S", "M", "L"]
+                description: "Falda plisada moderna, perfecta para looks casuales y elegantes."
             },
             {
                 id: 4,
-                name: "Jeans Skinny Premium",
-                price: 79.99,
+                name: "Jeans Skinny",
+                price: 39.99,
                 category: "mujer",
-                subcategory: "pantalones",
                 image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                description: "Jeans de ajuste perfecto, tela premium con elasticidad para mayor comodidad. Diseño moderno que se adapta a tu cuerpo sin perder estilo.",
-                features: ["Tela elastizada", "5 bolsillos", "Color durable", "Lavado especial", "Comodidad premium"],
-                rating: 4.7,
-                stock: 20,
-                sizes: ["24", "26", "28", "30", "32"]
+                description: "Jeans ajustados de alta calidad, cómodos y duraderos."
             },
             {
                 id: 5,
-                name: "Vestido de Noche Largo",
-                price: 129.99,
+                name: "Sweater de Lana",
+                price: 44.99,
                 category: "mujer",
-                subcategory: "vestidos",
-                image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                description: "Elegante vestido largo para eventos formales. Con detalles en encaje y corte princesa que realza la figura. Ideal para bodas, galas y eventos especiales.",
-                features: ["Encaje premium", "Corte princesa", "Forro interno", "Cremallera oculta", "Tela fluida"],
-                rating: 4.9,
-                badge: "Exclusivo",
-                stock: 5,
-                sizes: ["S", "M", "L"]
+                image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                description: "Sweater cálido y suave de lana natural, perfecto para el invierno."
             },
             {
                 id: 6,
-                name: "Blusa Manga Campana",
-                price: 39.99,
-                oldPrice: 49.99,
+                name: "Chaqueta de Cuero",
+                price: 89.99,
                 category: "mujer",
-                subcategory: "blusas",
-                image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-                description: "Blusa con manga campana, diseño único y moderno. Perfecta para looks casuales con un toque de elegancia. Tela ligera y cómoda para todo el día.",
-                features: ["Diseño único", "Manga campana", "Tela suave", "Fácil de combinar", "Corte relajado"],
-                rating: 4.2,
-                stock: 18,
-                sizes: ["XS", "S", "M", "L"]
+                image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                description: "Chaqueta de cuero genuino, elegante y resistente."
             }
         ];
+
+        // Carrito de compras
+        let cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
         
-        // ============================================
-        // SISTEMA DE PRODUCTOS
-        // ============================================
-        let productosFiltrados = [...productosMujer];
-        
-        function cargarProductos() {
+        // Producto actual para el modal
+        let currentProduct = null;
+
+        // Función para mostrar productos
+        function mostrarProductos() {
             const container = document.getElementById('productsContainer');
             
-            container.innerHTML = productosFiltrados.map(product => `
-                <div class="product-card" data-id="${product.id}">
-                    ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-                    
-                    <div class="product-img-container" data-id="${product.id}">
-                        <div class="product-img" style="background-image: url('${product.image}')"></div>
-                        <div class="product-overlay">
+            container.innerHTML = productosMujer.map(product => `
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('${product.image}')" data-id="${product.id}">
+                        <div class="quick-view-overlay">
                             <button class="quick-view-btn" data-id="${product.id}">
                                 <i class="fas fa-eye"></i> Vista Rápida
                             </button>
                         </div>
                     </div>
-                    
                     <div class="product-content">
-                        <h3 class="product-title" data-id="${product.id}">${product.name}</h3>
-                        
-                        ${product.rating ? `
-                            <div class="product-rating">
-                                ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5-Math.floor(product.rating))}
-                                <span style="color: #95a5a6; margin-left: 5px;">(${product.rating})</span>
-                            </div>
-                        ` : ''}
-                        
-                        <div class="product-price">
-                            ${product.oldPrice ? `<span class="product-old-price">$${product.oldPrice.toFixed(2)}</span>` : ''}
-                            $${product.price.toFixed(2)}
-                        </div>
-                        
-                        <p class="product-description">${product.description.substring(0, 100)}...</p>
-                        
-                        <button class="add-to-cart" data-id="${product.id}">
-                            <i class="fas fa-shopping-cart"></i> Añadir al Carrito
-                        </button>
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-price">$${product.price.toFixed(2)}</p>
+                        <button class="add-to-cart" data-id="${product.id}">Añadir al Carrito</button>
                     </div>
                 </div>
             `).join('');
             
-            // Configurar eventos para vista rápida
-            setupQuickViewEvents();
-            
-            // Configurar eventos para carrito
-            setupCartEvents();
-        }
-        
-        function setupQuickViewEvents() {
-            // Eventos para la imagen
-            document.querySelectorAll('.product-img-container').forEach(container => {
-                container.addEventListener('click', function(e) {
-                    if (!e.target.classList.contains('add-to-cart')) {
-                        const productId = parseInt(this.dataset.id);
-                        openQuickView(productId);
-                    }
+            // Agregar eventos a las imágenes para vista rápida
+            document.querySelectorAll('.product-img').forEach(img => {
+                img.addEventListener('click', function(e) {
+                    const productId = parseInt(this.dataset.id);
+                    abrirVistaRapida(productId);
                 });
             });
             
-            // Eventos para el botón de vista rápida
-            document.querySelectorAll('.quick-view-btn').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Evitar que se active el clic del contenedor
+            // Agregar eventos a los botones de vista rápida
+            document.querySelectorAll('.quick-view-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Evitar que se active el clic de la imagen
                     const productId = parseInt(this.dataset.id);
-                    openQuickView(productId);
+                    abrirVistaRapida(productId);
                 });
             });
             
-            // Eventos para el título
-            document.querySelectorAll('.product-title').forEach(title => {
-                title.addEventListener('click', function(e) {
-                    e.stopPropagation();
+            // Agregar eventos a los botones de carrito
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', function() {
                     const productId = parseInt(this.dataset.id);
-                    openQuickView(productId);
+                    agregarAlCarrito(productId);
                 });
             });
         }
-        
-        function setupCartEvents() {
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Evitar que se active la vista rápida
-                    const productId = parseInt(this.dataset.id);
-                    const product = productosFiltrados.find(p => p.id === productId);
-                    
-                    if (product) {
-                        addToCart(product);
-                    }
-                });
-            });
-        }
-        
-        // ============================================
-        // SISTEMA DE VISTA RÁPIDA
-        // ============================================
-        
-        function openQuickView(productId) {
-            const product = productosFiltrados.find(p => p.id === productId);
+
+        // Función para abrir vista rápida
+        function abrirVistaRapida(productId) {
+            const product = productosMujer.find(p => p.id === productId);
             if (!product) return;
             
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
-                <div class="modal-img" style="background-image: url('${product.image}')"></div>
-                <div class="modal-details">
-                    <h2>${product.name}</h2>
-                    
-                    ${product.rating ? `
-                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                            <div style="color: #f39c12; font-size: 18px;">
-                                ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5-Math.floor(product.rating))}
-                            </div>
-                            <span style="color: #95a5a6; margin-left: 10px;">${product.rating} / 5.0 (${Math.floor(Math.random() * 100) + 50} reseñas)</span>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="modal-price">
-                        ${product.oldPrice ? `<span style="font-size: 20px; color: #95a5a6; text-decoration: line-through; margin-right: 10px;">$${product.oldPrice.toFixed(2)}</span>` : ''}
-                        $${product.price.toFixed(2)}
-                        ${product.oldPrice ? `<span style="font-size: 14px; color: #27ae60; margin-left: 10px; background: #d5f4e6; padding: 2px 8px; border-radius: 4px;">${Math.round((1 - product.price/product.oldPrice) * 100)}% OFF</span>` : ''}
-                    </div>
-                    
-                    <p class="modal-description">${product.description}</p>
-                    
-                    ${product.features ? `
-                        <h4 style="margin: 20px 0 10px; color: #2c3e50;">Características:</h4>
-                        <ul class="modal-features">
-                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
-                        </ul>
-                    ` : ''}
-                    
-                    ${product.sizes ? `
-                        <div style="margin: 25px 0;">
-                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Talles disponibles:</h4>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                ${product.sizes.map(size => `
-                                    <button style="padding: 8px 15px; border: 2px solid #ddd; background: white; border-radius: 5px; cursor: pointer; transition: all 0.3s;" 
-                                            onmouseover="this.style.borderColor='#3498db'; this.style.color='#3498db'" 
-                                            onmouseout="this.style.borderColor='#ddd'; this.style.color='inherit'">
-                                        ${size}
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <div style="margin: 25px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="color: #555;">Disponibilidad:</span>
-                            <span style="color: ${product.stock > 5 ? '#27ae60' : product.stock > 0 ? '#f39c12' : '#e74c3c'}; font-weight: 600;">
-                                ${product.stock > 5 ? 'En stock' : product.stock > 0 ? 'Últimas unidades' : 'Agotado'} (${product.stock} unidades)
-                            </span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #555;">Categoría:</span>
-                            <span style="color: #3498db; font-weight: 600; text-transform: capitalize;">${product.subcategory}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 15px; margin-top: 25px;">
-                        <button class="add-to-cart" onclick="addToCartFromModal(${product.id})" style="flex: 2;">
-                            <i class="fas fa-shopping-cart"></i> Añadir al Carrito
-                        </button>
-                        <button style="flex: 1; background: #2c3e50; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;" 
-                                onmouseover="this.style.background='#34495e'" 
-                                onmouseout="this.style.background='#2c3e50'">
-                            <i class="fas fa-heart"></i> Favorito
-                        </button>
-                    </div>
-                </div>
-            `;
+            currentProduct = product;
             
-            const modal = document.getElementById('quickViewModal');
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeQuickView() {
-            const modal = document.getElementById('quickViewModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-        
-        function addToCartFromModal(productId) {
-            const product = productosFiltrados.find(p => p.id === productId);
-            if (product) {
-                addToCart(product);
-                closeQuickView();
-            }
-        }
-        
-        // ============================================
-        // SISTEMA DE CARRITO DE COMPRAS
-        // ============================================
-        
-        let cart = JSON.parse(localStorage.getItem('modaEleganteCart')) || [];
-        
-        function updateCartCount() {
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const cartCountElement = document.getElementById('cartCount');
-            if (cartCountElement) {
-                cartCountElement.textContent = totalItems;
-            }
-        }
-        
-        function addToCart(product) {
-            const cartProduct = {
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-                quantity: 1
-            };
+            document.getElementById('modalImg').style.backgroundImage = `url('${product.image}')`;
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modalPrice').textContent = `$${product.price.toFixed(2)}`;
+            document.getElementById('modalDescription').textContent = product.description;
             
-            const existingProductIndex = cart.findIndex(item => item.id === product.id);
+            document.getElementById('quickViewModal').style.display = 'flex';
+        }
+
+        // Función para cerrar modal
+        function cerrarModal() {
+            document.getElementById('quickViewModal').style.display = 'none';
+            currentProduct = null;
+        }
+
+        // Función para agregar al carrito
+        function agregarAlCarrito(productId) {
+            const product = productosMujer.find(p => p.id === productId);
+            if (!product) return;
             
-            if (existingProductIndex !== -1) {
-                cart[existingProductIndex].quantity += 1;
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
             } else {
-                cart.push(cartProduct);
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: 1
+                });
             }
             
             localStorage.setItem('modaEleganteCart', JSON.stringify(cart));
-            updateCartCount();
-            showAddedMessage(product.name);
+            actualizarContadorCarrito();
+            mostrarNotificacion(`¡${product.name} añadido al carrito!`);
         }
-        
-        function showAddedMessage(productName) {
-            // Eliminar mensaje anterior si existe
-            const existingMessage = document.querySelector('.cart-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            
-            const message = document.createElement('div');
-            message.className = 'cart-message';
-            message.style.cssText = `
+
+        // Función para actualizar contador del carrito
+        function actualizarContadorCarrito() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+        }
+
+        // Función para mostrar notificación
+        function mostrarNotificacion(mensaje) {
+            // Crear notificación
+            const notification = document.createElement('div');
+            notification.style.cssText = `
                 position: fixed;
-                top: 100px;
+                top: 20px;
                 right: 20px;
                 background: #27ae60;
                 color: white;
                 padding: 15px 25px;
-                border-radius: 8px;
+                border-radius: 5px;
                 z-index: 10000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
                 animation: slideIn 0.3s ease;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-                display: flex;
-                align-items: center;
-                max-width: 350px;
             `;
-            message.innerHTML = `
-                <i class="fas fa-check-circle" style="margin-right: 15px; font-size: 24px;"></i>
-                <div>
-                    <strong style="font-size: 16px;">¡Producto añadido!</strong><br>
-                    <span style="font-size: 14px;">${productName}</span><br>
-                    <small style="opacity: 0.8;">Ve al carrito para finalizar tu compra</small>
-                </div>
-            `;
-            document.body.appendChild(message);
             
-            // Crear estilo para la animación
+            notification.innerHTML = `
+                <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
+                ${mensaje}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Agregar animación
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes slideIn {
@@ -899,25 +570,39 @@
             `;
             document.head.appendChild(style);
             
+            // Remover después de 3 segundos
             setTimeout(() => {
-                message.style.animation = 'slideOut 0.3s ease';
+                notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => {
-                    message.remove();
+                    notification.remove();
                     style.remove();
                 }, 300);
             }, 3000);
         }
-        
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
-        
+
+        // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
-            // Actualizar contador del carrito
-            updateCartCount();
+            // Mostrar productos
+            mostrarProductos();
             
-            // Cargar productos
-            cargarProductos();
+            // Actualizar contador del carrito
+            actualizarContadorCarrito();
+            
+            // Configurar eventos del modal
+            document.getElementById('closeModal').addEventListener('click', cerrarModal);
+            document.getElementById('quickViewModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cerrarModal();
+                }
+            });
+            
+            // Configurar botón de añadir desde el modal
+            document.getElementById('modalAddToCart').addEventListener('click', function() {
+                if (currentProduct) {
+                    agregarAlCarrito(currentProduct.id);
+                    cerrarModal();
+                }
+            });
             
             // Configurar menú responsive
             const menuToggle = document.getElementById('menuToggle');
@@ -935,43 +620,12 @@
                 });
             }
             
-            // Configurar eventos del modal
-            const closeModalBtn = document.getElementById('closeModal');
-            const modalOverlay = document.getElementById('quickViewModal');
-            
-            if (closeModalBtn) {
-                closeModalBtn.addEventListener('click', closeQuickView);
-            }
-            
-            if (modalOverlay) {
-                modalOverlay.addEventListener('click', (e) => {
-                    if (e.target === modalOverlay) {
-                        closeQuickView();
-                    }
-                });
-            }
-            
-            // Cerrar modal con ESC
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeQuickView();
-                }
+            // Configurar carrito
+            document.getElementById('openCart').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'index.html';
             });
-            
-            // Evento para el icono del carrito
-            const openCartBtn = document.getElementById('openCart');
-            if (openCartBtn) {
-                openCartBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.href = 'index.html#cart';
-                });
-            }
         });
-        
-        // Hacer funciones disponibles globalmente para eventos onclick en HTML
-        window.openQuickView = openQuickView;
-        window.closeQuickView = closeQuickView;
-        window.addToCartFromModal = addToCartFromModal;
     </script>
 </body>
 </html>
